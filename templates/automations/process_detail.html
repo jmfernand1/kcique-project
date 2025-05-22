@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ process.name }} - Detalles del Proceso{% endblock %}
+
+{% block content %}
+<h1>{{ process.name }}</h1>
+
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<div class="process-meta">
+    <p><strong>Descripción:</strong> {{ process.description|default:"No especificada" }}</p>
+    <p><strong>Ruta del Script:</strong> <code>{{ process.script_path }}</code></p>
+    <p><strong>Entorno Virtual:</strong> <code>{{ process.virtual_env_path|default:"Sistema por defecto" }}</code></p>
+    <p><strong>Programación Cron:</strong> <code>{{ process.cron_schedule|default:"No especificada" }}</code></p>
+    <p><strong>Última Ejecución:</strong> {{ process.last_run_time|date:"d/m/Y H:i:s"|default:"N/A" }}</p>
+    <p><strong>Estado Última Ejecución:</strong> {{ process.last_run_status|default:"N/A" }}</p>
+    <p><strong>Activo:</strong> 
+        {% if process.is_active %}
+            <i class="fas fa-check-circle text-success"></i> Sí
+        {% else %}
+            <i class="fas fa-times-circle text-danger"></i> No
+        {% endif %}
+    </p>
+    <p><strong>Creado:</strong> {{ process.created_at|date:"d/m/Y H:i:s" }}</p>
+    <p><strong>Actualizado:</strong> {{ process.updated_at|date:"d/m/Y H:i:s" }}</p>
+</div>
+
+<div class="actions mt-3 mb-3">
+    <a href="{% url 'automations:run_process' process.id %}" class="btn btn-success" onclick="return confirm('¿Estás seguro de que deseas ejecutar este proceso ahora?');">
+        <i class="fas fa-play"></i> Ejecutar Ahora
+    </a>
+    <a href="{% url 'automations:process_update' process.pk %}" class="btn btn-warning"><i class="fas fa-edit"></i> Editar</a>
+    <a href="{% url 'automations:process_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+</div>
+
+<h2>Historial de Ejecuciones (Últimas 20)</h2>
+{% if logs %}
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
+                <th>Log</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.start_time|date:"d/m/Y H:i:s" }}</td>
+                <td>{{ log.end_time|date:"d/m/Y H:i:s"|default:"-" }}</td>
+                <td>
+                     <span class="badge bg-{% if log.status == 'SUCCESS' %}success{% elif log.status == 'FAILED' %}danger{% elif log.status == 'RUNNING' %}info{% elif log.status == 'STARTED' %}primary{% else %}secondary{% endif %}">
+                        {{ log.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-secondary view-log-btn" data-log-id="{{ log.id }}" data-bs-toggle="modal" data-bs-target="#logOutputModal">
+                        <i class="fas fa-file-alt"></i> Ver Salida
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No hay registros de ejecución para este proceso todavía.</p>
+{% endif %}
+
+<!-- Modal para mostrar salida del log -->
+<div class="modal fade" id="logOutputModal" tabindex="-1" aria-labelledby="logOutputModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="logOutputModalLabel">Salida del Log</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <pre id="logOutputContent">Cargando log...</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Necesitas Bootstrap 5 JS para que el modal funcione, asegúrate de incluirlo en tu base.html o aquí.
+// Si no usas Bootstrap para JS, necesitarás implementar la lógica del modal manualmente.
+document.addEventListener('DOMContentLoaded', function () {
+    const logButtons = document.querySelectorAll('.view-log-btn');
+    const logOutputContent = document.getElementById('logOutputContent');
+    const logModalElement = document.getElementById('logOutputModal');
+    let logModalInstance; // Guardar la instancia del modal
+
+    if (logModalElement) { // Solo inicializar si el modal existe en la página
+      logModalInstance = new bootstrap.Modal(logModalElement); 
+    }
+
+    logButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const logId = this.dataset.logId;
+            logOutputContent.textContent = 'Cargando log...';
+            // La apertura del modal es manejada por data-bs-toggle y data-bs-target
+
+            fetch(`{% url 'automations:get_log_output' 0 %}`.replace('0', logId)) 
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let formattedLog = data.output_log;
+                    if (data.status === 'FAILED' && data.output_log && data.output_log.includes('--- ERRORES')) {
+                        // Podríamos intentar dar formato a los errores aquí si quisiéramos
+                    }
+                    logOutputContent.textContent = formattedLog || 'No hay salida de log disponible.';
+                })
+                .catch(error => {
+                    console.error('Error fetching log:', error);
+                    logOutputContent.textContent = 'Error al cargar el log: ' + error.message;
+                });
+        });
+    });
+});
+</script>
+{% endblock %} 

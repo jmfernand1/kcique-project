@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bienvenido a Kcique{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="bg-light p-5 rounded-lg m-3 text-center">
+        <h1 class="display-4">Bienvenido a Kcique</h1>
+        <p class="lead"><strong>K</strong>iosco <strong>C</strong>entralizador de <strong>I</strong>nfo<strong>r</strong>mes y Q<strong>ue</strong>ries</p>
+        <hr class="my-4">
+        <p>
+            Kcique es una herramienta innovadora diseñada para centralizar y optimizar tus automatizaciones 
+            y la gestión de información crítica. Nuestro enfoque principal es la sección de Monitoreo e 
+            Inteligencia de Originación y Cobranzas.
+        </p>
+        <p>
+            Estamos aquí para revolucionar la forma en que operas las colocaciones de crédito, proporcionando 
+            una plataforma unificada que mejora la eficiencia, la toma de decisiones y el control de tus procesos.
+        </p>
+        <a class="btn btn-primary btn-lg mt-3" href="{% url 'automations:process_list' %}" role="button">
+            <i class="fas fa-cogs"></i> Ir a Automatizaciones
+        </a>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h2>Centralización</h2>
+            <p>Todos tus scripts y procesos automatizados en un solo lugar, fáciles de gestionar, monitorear y ejecutar. Reduce la complejidad y aumenta la visibilidad.</p>
+        </div>
+        <div class="col-md-6">
+            <h2>Inteligencia y Monitoreo</h2>
+            <p>Obtén insights valiosos de tus operaciones de originación y cobranzas. Kcique te ayuda a transformar datos en decisiones estratégicas.</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %} 
