@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Caso {{ caso.cod_caso_bizagi }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-file-alt mr-2"></i> Detalle del Caso</h1>
+        <div>
+            <a href="{% url 'adagio:casopendiente_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Listado
+            </a>
+            <a href="{% url 'adagio:casopendiente_update' caso.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'adagio:casopendiente_delete' caso.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Eliminar
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h4 class="m-0 font-weight-bold text-primary">Caso: {{ caso.cod_caso_bizagi }}</h4>
+            <span class="badge bg-{% if caso.estado == 'PENDIENTE' %}warning{% elif caso.estado == 'EN_PROCESO' %}info{% elif caso.estado == 'RESUELTO' %}success{% elif caso.estado == 'ERROR' %}danger{% else %}secondary{% endif %}">
+                {{ caso.estado }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Datos del Préstamo</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Cód. Bizagi:</dt>
+                        <dd class="col-sm-8">{{ caso.cod_caso_bizagi }}</dd>
+
+                        <dt class="col-sm-4">Núm. Préstamo:</dt>
+                        <dd class="col-sm-8">{{ caso.num_prestamo|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Docs Sol/Val:</dt>
+                        <dd class="col-sm-8">{{ caso.docsoldv|default:"-" }}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <h5>Datos de la Cuenta</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Tipo de Cuenta:</dt>
+                        <dd class="col-sm-8">{{ caso.tipo_de_cuenta|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Núm. Cuenta Débito:</dt>
+                        <dd class="col-sm-8">{{ caso.numcta_debito|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Secuencia Cta:</dt>
+                        <dd class="col-sm-8">{{ caso.secuencia_cta|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Cód. Banco:</dt>
+                        <dd class="col-sm-8">{{ caso.codigo_del_banco|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Cód. Ciudad:</dt>
+                        <dd class="col-sm-8">{{ caso.codigo_ciudad|default:"-" }}</dd>
+                    </dl>
+                </div>
+            </div>
+            <hr>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <h5>Trazabilidad</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Fecha Creación:</dt>
+                        <dd class="col-sm-8">{{ caso.fecha_creacion|date:"d/m/Y H:i:s" }}</dd>
+                        
+                        <dt class="col-sm-4">Fecha Actualización:</dt>
+                        <dd class="col-sm-8">{{ caso.fecha_actualizacion|date:"d/m/Y H:i:s" }}</dd>
+
+                        <dt class="col-sm-4">Inicio Proceso:</dt>
+                        <dd class="col-sm-8">{{ caso.fecha_inicio_proceso|date:"d/m/Y H:i:s"|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Fin Proceso:</dt>
+                        <dd class="col-sm-8">{{ caso.fecha_fin_proceso|date:"d/m/Y H:i:s"|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Intentos:</dt>
+                        <dd class="col-sm-8">{{ caso.intentos_procesamiento }}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <h5>Procesos y Errores</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Proceso Creador:</dt>
+                        <dd class="col-sm-8">{{ caso.proceso_creador|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Proceso Actualizador:</dt>
+                        <dd class="col-sm-8">{{ caso.proceso_actualizador|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Último Error:</dt>
+                        <dd class="col-sm-8">
+                            <pre class="p-2 bg-light border rounded">{{ caso.ultimo_error|default:"No hay errores registrados." }}</pre>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <hr>
+            <h5>Datos Adicionales</h5>
+            <pre class="p-2 bg-light border rounded">{{ caso.datos_adicionales|default:"No hay datos adicionales." }}</pre>
+
+        </div>
+    </div>
+</div>
+{% endblock %} 

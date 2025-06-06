@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect
 from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
 from django.utils import timezone
 from .models import CasoPendiente
-from .forms import CSVUploadForm
+from .forms import CSVUploadForm, CasoPendienteForm
 import pandas as pd
 import io # Para manejar el archivo en memoria
 from django.contrib import messages # Para mostrar mensajes al usuario
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 # Reutilizaremos la lógica de carga del script, pero adaptada a una vista
 # Idealmente, esta lógica podría estar en un archivo de 'servicios' o 'utils' de la app.
@@ -139,3 +141,47 @@ def dashboard_adagio(request):
         'casos_recientes': CasoPendiente.objects.all().order_by('-fecha_actualizacion')[:10] # Muestra los 10 más recientes
     }
     return render(request, 'adagio/dashboard.html', context)
+
+
+class CasoPendienteListView(ListView):
+    model = CasoPendiente
+    template_name = 'adagio/casopendiente_list.html'
+    context_object_name = 'casos'
+    paginate_by = 15
+
+
+class CasoPendienteDetailView(DetailView):
+    model = CasoPendiente
+    template_name = 'adagio/casopendiente_detail.html'
+    context_object_name = 'caso'
+
+
+class CasoPendienteCreateView(CreateView):
+    model = CasoPendiente
+    form_class = CasoPendienteForm
+    template_name = 'adagio/casopendiente_form.html'
+    success_url = reverse_lazy('adagio:casopendiente_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Crear Nuevo Caso'
+        return context
+
+
+class CasoPendienteUpdateView(UpdateView):
+    model = CasoPendiente
+    form_class = CasoPendienteForm
+    template_name = 'adagio/casopendiente_form.html'
+    success_url = reverse_lazy('adagio:casopendiente_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Editar Caso'
+        return context
+
+
+class CasoPendienteDeleteView(DeleteView):
+    model = CasoPendiente
+    template_name = 'adagio/casopendiente_confirm_delete.html'
+    success_url = reverse_lazy('adagio:casopendiente_list')
+    context_object_name = 'caso'
