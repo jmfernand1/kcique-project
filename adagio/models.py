@@ -6,12 +6,21 @@ class CasoDebito(models.Model):
     cod_caso_bizagi = models.CharField(max_length=255, unique=True, help_text="Código único del caso en Bizagi.")
     num_prestamo = models.CharField(max_length=255, blank=True, null=True, help_text="Número de préstamo asociado al caso.")
     docsoldv = models.CharField(max_length=255, blank=True, null=True, help_text="Documentos solicitados o validados.")
+    doctitulardv = models.CharField(max_length=255, blank=True, null=True, help_text="Número de identificación del titular de la cuenta.")
     tipo_de_cuenta = models.CharField(max_length=100, blank=True, null=True, help_text="Tipo de cuenta (ahorros, corriente, etc.).")
     numcta_debito = models.CharField(max_length=255, blank=True, null=True, help_text="Número de cuenta para débito.")
     secuencia_cta = models.CharField(max_length=100, blank=True, null=True, help_text="Secuencia de la cuenta.")
     codigo_del_banco = models.CharField(max_length=100, blank=True, null=True, help_text="Código del banco.")
     codigo_ciudad = models.CharField(max_length=100, blank=True, null=True, help_text="Código de la ciudad.")
-    estado = models.CharField(max_length=100, default='PENDIENTE', help_text="Estado actual del caso (PENDIENTE, EN_PROCESO, RESUELTO, ERROR).")
+
+    ESTADO_CHOICES = (
+        ("PENDIENTE", "PENDIENTE"),
+        ("GRABADO", "GRABADO"),
+        ("PENDIENTE BIZAGI", "PENDIENTE BIZAGI"),
+        ("FINALIZADO", "FINALIZADO"),
+        ("CON ERROR", "CON ERROR"),
+    )
+    estado = models.CharField(max_length=100, choices=ESTADO_CHOICES, default='PENDIENTE', help_text="Estado actual del caso.")
 
     # Campos para trazabilidad
     fecha_creacion = models.DateTimeField(auto_now_add=True, help_text="Fecha y hora en que se registró el caso.")

@@ -52,6 +52,7 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
             defaults = {
                 'num_prestamo': str(row.get('num_prestamo', '')) or None,
                 'docsoldv': str(row.get('docsoldv', '')) or None,
+                'doctitulardv': str(row.get('doctitulardv', '')) or None,
                 'tipo_de_cuenta': str(row.get('tipo_de_cuenta', '')) or None,
                 'numcta_debito': str(row.get('numcta_debito', '')) or None,
                 'secuencia_cta': str(row.get('secuencia_cta', '')) or None,
@@ -92,15 +93,16 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
 def dashboard_adagio(request):
     # Estadísticas
     casos_pendientes = CasoDebito.objects.filter(estado='PENDIENTE').count()
-    casos_en_proceso = CasoDebito.objects.filter(estado='EN_PROCESO').count()
-    casos_resueltos = CasoDebito.objects.filter(estado='RESUELTO').count()
-    casos_con_error_db = CasoDebito.objects.filter(estado='ERROR').count()
+    casos_grabado = CasoDebito.objects.filter(estado='GRABADO').count()
+    casos_pendiente_bizagi = CasoDebito.objects.filter(estado='PENDIENTE BIZAGI').count()
+    casos_finalizado = CasoDebito.objects.filter(estado='FINALIZADO').count()
+    casos_con_error_db = CasoDebito.objects.filter(estado='CON ERROR').count()
     total_casos = CasoDebito.objects.count()
 
     # Promedio de tiempo de ejecución para casos resueltos
     # Se calcula la diferencia entre fecha_fin_proceso y fecha_inicio_proceso
     casos_completados_con_tiempo = CasoDebito.objects.filter(
-        estado='RESUELTO',
+        estado='FINALIZADO',
         fecha_inicio_proceso__isnull=False,
         fecha_fin_proceso__isnull=False
     ).annotate(
@@ -135,8 +137,9 @@ def dashboard_adagio(request):
 
     context = {
         'casos_pendientes': casos_pendientes,
-        'casos_en_proceso': casos_en_proceso,
-        'casos_resueltos': casos_resueltos,
+        'casos_grabado': casos_grabado,
+        'casos_pendiente_bizagi': casos_pendiente_bizagi,
+        'casos_finalizado': casos_finalizado,
         'casos_con_error_db': casos_con_error_db,
         'total_casos': total_casos,
         'promedio_ejecucion': promedio_ejecucion, # Puede ser None si no hay datos
