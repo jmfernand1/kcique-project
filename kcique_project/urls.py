@@ -22,5 +22,6 @@ from automations import views as automations_views # Importar vistas de automati
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('automations/', include('automations.urls', namespace='automations')),
-    path('', automations_views.home_view, name='home') # Nueva ruta raíz
+    path('', automations_views.home_view, name='home'),
+    path('adagio/', include('adagio.urls')),
 ]

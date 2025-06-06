@@ -150,4 +150,11 @@ staticfiles/
 media/
 
 # Kcique specific (if any, e.g., logs not covered by *.log)
-# kcique_custom_logs/ 
+# kcique_custom_logs/
+
+# mac ds_store
+.DS_Store
+
+# mac hidden files
+.AppleDouble
+.AppleDB
