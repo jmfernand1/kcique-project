@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
+from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField, Q
 from django.utils import timezone
 from .models import CasoPendiente
 from .forms import CSVUploadForm, CasoPendienteForm
@@ -147,7 +147,23 @@ class CasoPendienteListView(ListView):
     model = CasoPendiente
     template_name = 'adagio/casopendiente_list.html'
     context_object_name = 'casos'
-    paginate_by = 15
+    paginate_by = 30
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-fecha_creacion')
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(cod_caso_bizagi__icontains=query) |
+                Q(num_prestamo__icontains=query) |
+                Q(docsoldv__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        return context
 
 
 class CasoPendienteDetailView(DetailView):

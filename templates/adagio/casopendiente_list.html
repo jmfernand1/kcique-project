@@ -17,6 +17,17 @@
             <h4 class="m-0 font-weight-bold text-primary">Listado de Casos</h4>
         </div>
         <div class="card-body">
+            <div class="mb-4">
+                <form method="get" action="{% url 'adagio:casopendiente_list' %}">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="q" placeholder="Buscar por Cód. Bizagi, N° Préstamo o Documento..." value="{{ search_query }}">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             {% if casos %}
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" width="100%" cellspacing="0">
@@ -64,35 +75,61 @@
                         <ul class="pagination justify-content-center">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
-                                        <span aria-hidden="true">&laquo;</span>
+                                    <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Primera">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Anterior">
+                                        &laquo;
                                     </a>
                                 </li>
                             {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;&laquo;</span>
+                                </li>
                                 <li class="page-item disabled">
                                     <span class="page-link">&laquo;</span>
                                 </li>
                             {% endif %}
                             
                             {% for i in paginator.page_range %}
-                                {% if page_obj.number == i %}
-                                    <li class="page-item active" aria-current="page">
-                                        <span class="page-link">{{ i }}</span>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                {% if page_obj.number > 4 and forloop.first %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+
+                                {% if i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                    {% if page_obj.number == i %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if page_obj.number < paginator.num_pages|add:'-3' and forloop.last %}
+                                     <li class="page-item disabled"><span class="page-link">...</span></li>
                                 {% endif %}
                             {% endfor %}
 
                             {% if page_obj.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
-                                        <span aria-hidden="true">&raquo;</span>
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Siguiente">
+                                        &raquo;
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Última">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
                                     </a>
                                 </li>
                             {% else %}
                                 <li class="page-item disabled">
                                     <span class="page-link">&raquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;&raquo;</span>
                                 </li>
                             {% endif %}
                         </ul>
@@ -100,12 +137,21 @@
                 {% endif %}
 
             {% else %}
-                <p class="text-center">No hay casos para mostrar.</p>
-                <div class="text-center">
-                    <a href="{% url 'adagio:casopendiente_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Crear el Primer Caso
-                    </a>
-                </div>
+                {% if search_query %}
+                     <p class="text-center">No se encontraron casos que coincidan con "<strong>{{ search_query }}</strong>".</p>
+                     <div class="text-center">
+                        <a href="{% url 'adagio:casopendiente_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Limpiar Búsqueda
+                        </a>
+                     </div>
+                {% else %}
+                    <p class="text-center">No hay casos para mostrar.</p>
+                    <div class="text-center">
+                        <a href="{% url 'adagio:casopendiente_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Crear el Primer Caso
+                        </a>
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>
