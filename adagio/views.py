@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField, Q
 from django.utils import timezone
-from .models import CasoPendiente
-from .forms import CSVUploadForm, CasoPendienteForm
+from .models import CasoDebito
+from .forms import CSVUploadForm, CasoDebitoForm
 import pandas as pd
 import io # Para manejar el archivo en memoria
 from django.contrib import messages # Para mostrar mensajes al usuario
@@ -14,7 +14,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 
 def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
     """
-    Procesa un archivo CSV subido y carga los datos en el modelo CasoPendiente.
+    Procesa un archivo CSV subido y carga los datos en el modelo CasoDebito.
     Retorna un resumen de la operación.
     """
     try:
@@ -58,7 +58,7 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
                 'proceso_actualizador': nombre_script,
             }
 
-            caso, creado = CasoPendiente.objects.update_or_create(
+            caso, creado = CasoDebito.objects.update_or_create(
                 cod_caso_bizagi=cod_caso_bizagi,
                 defaults=defaults
             )
@@ -88,15 +88,15 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
 
 def dashboard_adagio(request):
     # Estadísticas
-    casos_pendientes = CasoPendiente.objects.filter(estado='PENDIENTE').count()
-    casos_en_proceso = CasoPendiente.objects.filter(estado='EN_PROCESO').count()
-    casos_resueltos = CasoPendiente.objects.filter(estado='RESUELTO').count()
-    casos_con_error_db = CasoPendiente.objects.filter(estado='ERROR').count()
-    total_casos = CasoPendiente.objects.count()
+    casos_pendientes = CasoDebito.objects.filter(estado='PENDIENTE').count()
+    casos_en_proceso = CasoDebito.objects.filter(estado='EN_PROCESO').count()
+    casos_resueltos = CasoDebito.objects.filter(estado='RESUELTO').count()
+    casos_con_error_db = CasoDebito.objects.filter(estado='ERROR').count()
+    total_casos = CasoDebito.objects.count()
 
     # Promedio de tiempo de ejecución para casos resueltos
     # Se calcula la diferencia entre fecha_fin_proceso y fecha_inicio_proceso
-    casos_completados_con_tiempo = CasoPendiente.objects.filter(
+    casos_completados_con_tiempo = CasoDebito.objects.filter(
         estado='RESUELTO',
         fecha_inicio_proceso__isnull=False,
         fecha_fin_proceso__isnull=False
@@ -138,13 +138,13 @@ def dashboard_adagio(request):
         'total_casos': total_casos,
         'promedio_ejecucion': promedio_ejecucion, # Puede ser None si no hay datos
         'form': form,
-        'casos_recientes': CasoPendiente.objects.all().order_by('-fecha_actualizacion')[:10] # Muestra los 10 más recientes
+        'casos_recientes': CasoDebito.objects.all().order_by('-fecha_actualizacion')[:10] # Muestra los 10 más recientes
     }
     return render(request, 'adagio/dashboard.html', context)
 
 
-class CasoPendienteListView(ListView):
-    model = CasoPendiente
+class CasoDebitoListView(ListView):
+    model = CasoDebito
     template_name = 'adagio/casopendiente_list.html'
     context_object_name = 'casos'
     paginate_by = 30
@@ -166,15 +166,15 @@ class CasoPendienteListView(ListView):
         return context
 
 
-class CasoPendienteDetailView(DetailView):
-    model = CasoPendiente
+class CasoDebitoDetailView(DetailView):
+    model = CasoDebito
     template_name = 'adagio/casopendiente_detail.html'
     context_object_name = 'caso'
 
 
-class CasoPendienteCreateView(CreateView):
-    model = CasoPendiente
-    form_class = CasoPendienteForm
+class CasoDebitoCreateView(CreateView):
+    model = CasoDebito
+    form_class = CasoDebitoForm
     template_name = 'adagio/casopendiente_form.html'
     success_url = reverse_lazy('adagio:casopendiente_list')
 
@@ -184,9 +184,9 @@ class CasoPendienteCreateView(CreateView):
         return context
 
 
-class CasoPendienteUpdateView(UpdateView):
-    model = CasoPendiente
-    form_class = CasoPendienteForm
+class CasoDebitoUpdateView(UpdateView):
+    model = CasoDebito
+    form_class = CasoDebitoForm
     template_name = 'adagio/casopendiente_form.html'
     success_url = reverse_lazy('adagio:casopendiente_list')
 
@@ -196,8 +196,8 @@ class CasoPendienteUpdateView(UpdateView):
         return context
 
 
-class CasoPendienteDeleteView(DeleteView):
-    model = CasoPendiente
+class CasoDebitoDeleteView(DeleteView):
+    model = CasoDebito
     template_name = 'adagio/casopendiente_confirm_delete.html'
     success_url = reverse_lazy('adagio:casopendiente_list')
     context_object_name = 'caso'

@@ -11,11 +11,11 @@ sys.path.append(project_path)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kcique_project.settings') # Reemplaza 'kcique_project' con el nombre de tu proyecto Django
 django.setup()
 
-from adagio.models import CasoPendiente # Asegúrate que 'adagio' es el nombre de tu app
+from adagio.models import CasoDebito # Asegúrate que 'adagio' es el nombre de tu app
 
 def cargar_casos_desde_csv(ruta_csv, nombre_script='cargar_casos.py'):
     """
-    Lee un archivo CSV con casos pendientes y los carga en el modelo CasoPendiente.
+    Lee un archivo CSV con casos pendientes y los carga en el modelo CasoDebito.
 
     Args:
         ruta_csv (str): Ruta al archivo CSV.
@@ -42,7 +42,7 @@ def cargar_casos_desde_csv(ruta_csv, nombre_script='cargar_casos.py'):
             cod_caso_bizagi = str(row['cod_caso_bizagi']) # Campo obligatorio y único
             
             # Busca si el caso ya existe
-            caso, creado = CasoPendiente.objects.update_or_create(
+            caso, creado = CasoDebito.objects.update_or_create(
                 cod_caso_bizagi=cod_caso_bizagi,
                 defaults={
                     'num_prestamo': str(row.get('num_prestamo', '')) or None,
@@ -75,7 +75,7 @@ def cargar_casos_desde_csv(ruta_csv, nombre_script='cargar_casos.py'):
             casos_con_error +=1
             # Opcional: registrar el error en el campo ultimo_error del modelo si se puede identificar el caso
             # if 'cod_caso_bizagi' in row:
-            #     CasoPendiente.objects.filter(cod_caso_bizagi=row['cod_caso_bizagi']).update(
+            #     CasoDebito.objects.filter(cod_caso_bizagi=row['cod_caso_bizagi']).update(
             #         ultimo_error=str(e), 
             #         proceso_actualizador=nombre_script,
             #         estado='ERROR' # Podrías marcarlo como error

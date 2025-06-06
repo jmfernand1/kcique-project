@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import CasoPendiente
+from .models import CasoDebito
 
-@admin.register(CasoPendiente)
-class CasoPendienteAdmin(admin.ModelAdmin):
+@admin.register(CasoDebito)
+class CasoDebitoAdmin(admin.ModelAdmin):
     list_display = (
         'cod_caso_bizagi',
         'estado',

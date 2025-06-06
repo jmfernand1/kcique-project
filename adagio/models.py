@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-class CasoPendiente(models.Model):
+class CasoDebito(models.Model):
     cod_caso_bizagi = models.CharField(max_length=255, unique=True, help_text="Código único del caso en Bizagi.")
     num_prestamo = models.CharField(max_length=255, blank=True, null=True, help_text="Número de préstamo asociado al caso.")
     docsoldv = models.TextField(blank=True, null=True, help_text="Documentos solicitados o validados.")

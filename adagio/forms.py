@@ -1,12 +1,12 @@
 from django import forms
-from .models import CasoPendiente
+from .models import CasoDebito
 
 class CSVUploadForm(forms.Form):
     csv_file = forms.FileField(label='Selecciona un archivo CSV')
 
-class CasoPendienteForm(forms.ModelForm):
+class CasoDebitoForm(forms.ModelForm):
     class Meta:
-        model = CasoPendiente
+        model = CasoDebito
         fields = '__all__'
         widgets = {
             'fecha_inicio_proceso': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
