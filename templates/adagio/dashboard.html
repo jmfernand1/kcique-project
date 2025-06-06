@@ -151,7 +151,7 @@
                                 <td>{{ caso.proceso_creador|default_if_none:"-" }}</td>
                                 <td>{{ caso.proceso_actualizador|default_if_none:"-" }}</td>
                                 <td>
-                                    <a href="{% url 'admin:adagio_casopendiente_change' caso.id %}" class="btn btn-sm btn-info" title="Ver/Editar en Admin">
+                                    <a href="{% url 'admin:adagio_casodebito_change' caso.id %}" class="btn btn-sm btn-info" title="Ver/Editar en Admin">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </td>
