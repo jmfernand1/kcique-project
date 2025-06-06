@@ -8,6 +8,9 @@ import io # Para manejar el archivo en memoria
 from django.contrib import messages # Para mostrar mensajes al usuario
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from .serializers import CasoDebitoSerializer
 
 # Reutilizaremos la lógica de carga del script, pero adaptada a una vista
 # Idealmente, esta lógica podría estar en un archivo de 'servicios' o 'utils' de la app.
@@ -201,3 +204,14 @@ class CasoDebitoDeleteView(DeleteView):
     template_name = 'adagio/casopendiente_confirm_delete.html'
     success_url = reverse_lazy('adagio:casopendiente_list')
     context_object_name = 'caso'
+
+
+# API Views
+class CasoDebitoViewSet(viewsets.ModelViewSet):
+    """
+    Endpoint de la API que permite ver o editar los casos de débito.
+    """
+    queryset = CasoDebito.objects.all().order_by('-fecha_creacion')
+    serializer_class = CasoDebitoSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['estado', 'cod_caso_bizagi', 'num_prestamo']

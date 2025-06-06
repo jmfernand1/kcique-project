@@ -5,7 +5,7 @@ from django.db import models
 class CasoDebito(models.Model):
     cod_caso_bizagi = models.CharField(max_length=255, unique=True, help_text="Código único del caso en Bizagi.")
     num_prestamo = models.CharField(max_length=255, blank=True, null=True, help_text="Número de préstamo asociado al caso.")
-    docsoldv = models.TextField(blank=True, null=True, help_text="Documentos solicitados o validados.")
+    docsoldv = models.CharField(max_length=255, blank=True, null=True, help_text="Documentos solicitados o validados.")
     tipo_de_cuenta = models.CharField(max_length=100, blank=True, null=True, help_text="Tipo de cuenta (ahorros, corriente, etc.).")
     numcta_debito = models.CharField(max_length=255, blank=True, null=True, help_text="Número de cuenta para débito.")
     secuencia_cta = models.CharField(max_length=100, blank=True, null=True, help_text="Secuencia de la cuenta.")
