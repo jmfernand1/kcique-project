@@ -58,6 +58,7 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
                 'secuencia_cta': str(row.get('secuencia_cta', '')) or None,
                 'codigo_del_banco': str(row.get('codigo_del_banco', '')) or None,
                 'codigo_ciudad': str(row.get('codigo_ciudad', '')) or None,
+                'tipo_debito': str(row.get('tipo_debito', 'AL TITULAR')) or 'AL TITULAR',
                 'estado': str(row.get('estado', 'PENDIENTE')) or 'PENDIENTE',
                 'proceso_actualizador': nombre_script,
             }

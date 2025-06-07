@@ -12,7 +12,12 @@ class CasoDebito(models.Model):
     secuencia_cta = models.CharField(max_length=100, blank=True, null=True, help_text="Secuencia de la cuenta.")
     codigo_del_banco = models.CharField(max_length=100, blank=True, null=True, help_text="Código del banco.")
     codigo_ciudad = models.CharField(max_length=100, blank=True, null=True, help_text="Código de la ciudad.")
-
+    TIPO_DEBITO_CHOICES = (
+        ("AL TITULAR", "AL TITULAR"),
+        ("A TERCEROS", "A TERCEROS"),
+    )
+    tipo_debito = models.CharField(max_length=100, choices=TIPO_DEBITO_CHOICES, default='AL TITULAR', help_text="Tipo de débito.")
+    
     ESTADO_CHOICES = (
         ("PENDIENTE", "PENDIENTE"),
         ("GRABADO", "GRABADO"),
