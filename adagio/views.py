@@ -98,6 +98,7 @@ def dashboard_adagio(request):
     casos_pendiente_bizagi = CasoDebito.objects.filter(estado='PENDIENTE BIZAGI').count()
     casos_finalizado = CasoDebito.objects.filter(estado='FINALIZADO').count()
     casos_con_error_db = CasoDebito.objects.filter(estado='CON ERROR').count()
+    casos_validar_db = CasoDebito.objects.filter(estado='VALIDAR').count()
     total_casos = CasoDebito.objects.count()
 
     # Promedio de tiempo de ejecución para casos resueltos
@@ -142,6 +143,7 @@ def dashboard_adagio(request):
         'casos_pendiente_bizagi': casos_pendiente_bizagi,
         'casos_finalizado': casos_finalizado,
         'casos_con_error_db': casos_con_error_db,
+        'casos_validar_db': casos_validar_db,
         'total_casos': total_casos,
         'promedio_ejecucion': promedio_ejecucion, # Puede ser None si no hay datos
         'form': form,

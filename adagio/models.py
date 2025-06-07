@@ -23,6 +23,7 @@ class CasoDebito(models.Model):
         ("GRABADO", "GRABADO"),
         ("PENDIENTE BIZAGI", "PENDIENTE BIZAGI"),
         ("FINALIZADO", "FINALIZADO"),
+        ("VALIDAR", "VALIDAR"),
         ("CON ERROR", "CON ERROR"),
     )
     estado = models.CharField(max_length=100, choices=ESTADO_CHOICES, default='PENDIENTE', help_text="Estado actual del caso.")
