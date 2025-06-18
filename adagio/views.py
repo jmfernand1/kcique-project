@@ -8,6 +8,9 @@ import io # Para manejar el archivo en memoria
 from django.contrib import messages # Para mostrar mensajes al usuario
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from .serializers import CasoDebitoSerializer
 
 # Reutilizaremos la lógica de carga del script, pero adaptada a una vista
 # Idealmente, esta lógica podría estar en un archivo de 'servicios' o 'utils' de la app.
@@ -49,11 +52,13 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
             defaults = {
                 'num_prestamo': str(row.get('num_prestamo', '')) or None,
                 'docsoldv': str(row.get('docsoldv', '')) or None,
+                'doctitulardv': str(row.get('doctitulardv', '')) or None,
                 'tipo_de_cuenta': str(row.get('tipo_de_cuenta', '')) or None,
                 'numcta_debito': str(row.get('numcta_debito', '')) or None,
                 'secuencia_cta': str(row.get('secuencia_cta', '')) or None,
                 'codigo_del_banco': str(row.get('codigo_del_banco', '')) or None,
                 'codigo_ciudad': str(row.get('codigo_ciudad', '')) or None,
+                'tipo_debito': str(row.get('tipo_debito', 'AL TITULAR')) or 'AL TITULAR',
                 'estado': str(row.get('estado', 'PENDIENTE')) or 'PENDIENTE',
                 'proceso_actualizador': nombre_script,
             }
@@ -89,15 +94,17 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
 def dashboard_adagio(request):
     # Estadísticas
     casos_pendientes = CasoDebito.objects.filter(estado='PENDIENTE').count()
-    casos_en_proceso = CasoDebito.objects.filter(estado='EN_PROCESO').count()
-    casos_resueltos = CasoDebito.objects.filter(estado='RESUELTO').count()
-    casos_con_error_db = CasoDebito.objects.filter(estado='ERROR').count()
+    casos_grabado = CasoDebito.objects.filter(estado='GRABADO').count()
+    casos_pendiente_bizagi = CasoDebito.objects.filter(estado='PENDIENTE BIZAGI').count()
+    casos_finalizado = CasoDebito.objects.filter(estado='FINALIZADO').count()
+    casos_con_error_db = CasoDebito.objects.filter(estado='CON ERROR').count()
+    casos_validar_db = CasoDebito.objects.filter(estado='VALIDAR').count()
     total_casos = CasoDebito.objects.count()
 
     # Promedio de tiempo de ejecución para casos resueltos
     # Se calcula la diferencia entre fecha_fin_proceso y fecha_inicio_proceso
     casos_completados_con_tiempo = CasoDebito.objects.filter(
-        estado='RESUELTO',
+        estado='FINALIZADO',
         fecha_inicio_proceso__isnull=False,
         fecha_fin_proceso__isnull=False
     ).annotate(
@@ -132,9 +139,11 @@ def dashboard_adagio(request):
 
     context = {
         'casos_pendientes': casos_pendientes,
-        'casos_en_proceso': casos_en_proceso,
-        'casos_resueltos': casos_resueltos,
+        'casos_grabado': casos_grabado,
+        'casos_pendiente_bizagi': casos_pendiente_bizagi,
+        'casos_finalizado': casos_finalizado,
         'casos_con_error_db': casos_con_error_db,
+        'casos_validar_db': casos_validar_db,
         'total_casos': total_casos,
         'promedio_ejecucion': promedio_ejecucion, # Puede ser None si no hay datos
         'form': form,
@@ -201,3 +210,14 @@ class CasoDebitoDeleteView(DeleteView):
     template_name = 'adagio/casopendiente_confirm_delete.html'
     success_url = reverse_lazy('adagio:casopendiente_list')
     context_object_name = 'caso'
+
+
+# API Views
+class CasoDebitoViewSet(viewsets.ModelViewSet):
+    """
+    Endpoint de la API que permite ver o editar los casos de débito.
+    """
+    queryset = CasoDebito.objects.all().order_by('-fecha_creacion')
+    serializer_class = CasoDebitoSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['estado', 'cod_caso_bizagi', 'num_prestamo']

@@ -46,10 +46,23 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="card-title mb-0">En Proceso</h5>
-                            <p class="card-text display-4">{{ casos_en_proceso }}</p>
+                            <h5 class="card-title mb-0">Pendiente Bizagi</h5>
+                            <p class="card-text display-4">{{ casos_pendiente_bizagi }}</p>
                         </div>
                         <i class="fas fa-tasks fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-secondary shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Grabado</h5>
+                            <p class="card-text display-4">{{ casos_grabado }}</p>
+                        </div>
+                        <i class="fas fa-save fa-3x"></i>
                     </div>
                 </div>
             </div>
@@ -59,8 +72,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="card-title mb-0">Resueltos</h5>
-                            <p class="card-text display-4">{{ casos_resueltos }}</p>
+                            <h5 class="card-title mb-0">Finalizado</h5>
+                            <p class="card-text display-4">{{ casos_finalizado }}</p>
                         </div>
                         <i class="fas fa-check-circle fa-3x"></i>
                     </div>
@@ -72,7 +85,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="card-title mb-0">Con Error (DB)</h5>
+                            <h5 class="card-title mb-0">Con Error</h5>
                             <p class="card-text display-4">{{ casos_con_error_db }}</p>
                         </div>
                         <i class="fas fa-exclamation-triangle fa-3x"></i>
@@ -80,12 +93,26 @@
                 </div>
             </div>
         </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-dark shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Validar</h5>
+                            <p class="card-text display-4">{{ casos_validar_db }}</p>
+                        </div>
+                        <i class="fas fa-binoculars fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-lg-9 col-md-6 mb-3">
             <div class="card shadow">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="fas fa-clock mr-2"></i>Promedio de Ejecución (Resueltos)</h5>
+                    <h5 class="card-title"><i class="fas fa-clock mr-2"></i>Promedio de Ejecución (Finalizados)</h5>
                     <p class="card-text h2">{{ promedio_ejecucion|default:"N/A" }}</p>
-                    <small class="text-muted">(Tiempo desde inicio a fin de proceso para casos resueltos)</small>
+                    <small class="text-muted">(Tiempo desde inicio a fin de proceso para casos finalizados)</small>
                 </div>
             </div>
         </div>
@@ -113,56 +140,6 @@
                 </div>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-upload mr-2"></i>Cargar Archivo</button>
             </form>
-        </div>
-    </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-list-alt mr-2"></i>Últimos Casos Actualizados</h4>
-        </div>
-        <div class="card-body">
-            {% if casos_recientes %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>Cód. Bizagi</th>
-                                <th>Estado</th>
-                                <th>Núm. Préstamo</th>
-                                <th>Tipo Cuenta</th>
-                                <th>Última Actualización</th>
-                                <th>Creador</th>
-                                <th>Actualizador</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for caso in casos_recientes %}
-                            <tr>
-                                <td>{{ caso.cod_caso_bizagi }}</td>
-                                <td>
-                                    <span class="badge badge-pill badge-{% if caso.estado == 'PENDIENTE' %}warning{% elif caso.estado == 'EN_PROCESO' %}info{% elif caso.estado == 'RESUELTO' %}success{% elif caso.estado == 'ERROR' %}danger{% else %}secondary{% endif %}">
-                                        {{ caso.estado }}
-                                    </span>
-                                </td>
-                                <td>{{ caso.num_prestamo|default_if_none:"-" }}</td>
-                                <td>{{ caso.tipo_de_cuenta|default_if_none:"-" }}</td>
-                                <td>{{ caso.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
-                                <td>{{ caso.proceso_creador|default_if_none:"-" }}</td>
-                                <td>{{ caso.proceso_actualizador|default_if_none:"-" }}</td>
-                                <td>
-                                    <a href="{% url 'admin:adagio_casodebito_change' caso.id %}" class="btn btn-sm btn-info" title="Ver/Editar en Admin">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-center">No hay casos para mostrar.</p>
-            {% endif %}
         </div>
     </div>
 </div>

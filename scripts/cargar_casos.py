@@ -38,6 +38,7 @@ def cargar_casos_desde_df(df, nombre_script='cargar_casos.py'):
             defaults = {
                 'num_prestamo': str(row.get('num_prestamo', '')) or None,
                 'docsoldv': str(row.get('docsoldv', '')) or None,
+                'doctitulardv': str(row.get('doctitulardv', '')) or None,
                 'tipo_de_cuenta': str(row.get('tipo_de_cuenta', '')) or None,
                 'numcta_debito': str(row.get('numcta_debito', '')) or None,
                 'secuencia_cta': str(row.get('secuencia_cta', '')) or None,
