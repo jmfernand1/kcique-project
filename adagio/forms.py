@@ -2,7 +2,7 @@ from django import forms
 from .models import CasoDebito
 
 class CSVUploadForm(forms.Form):
-    csv_file = forms.FileField(label='Selecciona un archivo CSV')
+    csv_file = forms.FileField(label="Archivo CSV", help_text="Sube un archivo .csv para procesar.")
 
 class CasoDebitoForm(forms.ModelForm):
     class Meta:

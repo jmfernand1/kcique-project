@@ -13,65 +13,164 @@
     </ul>
 {% endif %}
 
-<div class="process-meta">
-    <p><strong>Descripción:</strong> {{ process.description|default:"No especificada" }}</p>
-    <p><strong>Ruta del Script:</strong> <code>{{ process.script_path }}</code></p>
-    <p><strong>Entorno Virtual:</strong> <code>{{ process.virtual_env_path|default:"Sistema por defecto" }}</code></p>
-    <p><strong>Programación Cron:</strong> <code>{{ process.cron_schedule|default:"No especificada" }}</code></p>
-    <p><strong>Última Ejecución:</strong> {{ process.last_run_time|date:"d/m/Y H:i:s"|default:"N/A" }}</p>
-    <p><strong>Estado Última Ejecución:</strong> {{ process.last_run_status|default:"N/A" }}</p>
-    <p><strong>Activo:</strong> 
-        {% if process.is_active %}
-            <i class="fas fa-check-circle text-success"></i> Sí
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-info-circle mr-2"></i> Detalles del Proceso</h4>
+        <div>
+            <a href="{% url 'automations:process_update' process.pk %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Editar</a>
+            <a href="{% url 'automations:process_delete' process.pk %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Eliminar</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="process-meta">
+            <p><strong>Descripción:</strong> {{ process.description|default:"No especificada" }}</p>
+            <p><strong>Ruta del Script:</strong> <code>{{ process.script_path }}</code></p>
+            <p><strong>Entorno Virtual:</strong> <code>{{ process.virtual_env_path|default:"Sistema por defecto" }}</code></p>
+            <p><strong>Programación Cron:</strong> <code>{{ process.cron_schedule|default:"No especificada" }}</code></p>
+            <p><strong>Última Ejecución:</strong> {{ process.last_run_time|date:"d/m/Y H:i:s"|default:"N/A" }}</p>
+            <p><strong>Estado Última Ejecución:</strong> {{ process.last_run_status|default:"N/A" }}</p>
+            <p><strong>Activo:</strong> 
+                {% if process.is_active %}
+                    <i class="fas fa-check-circle text-success"></i> Sí
+                {% else %}
+                    <i class="fas fa-times-circle text-danger"></i> No
+                {% endif %}
+            </p>
+            <p><strong>Creado:</strong> {{ process.created_at|date:"d/m/Y H:i:s" }}</p>
+            <p><strong>Actualizado:</strong> {{ process.updated_at|date:"d/m/Y H:i:s" }}</p>
+        </div>
+
+        <div class="actions mt-3 mb-3">
+            <a href="{% url 'automations:run_process' process.id %}" class="btn btn-success" onclick="return confirm('¿Estás seguro de que deseas ejecutar este proceso ahora?');">
+                <i class="fas fa-play"></i> Ejecutar Ahora
+            </a>
+            <a href="{% url 'automations:process_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+        </div>
+
+        <h2>Historial de Ejecuciones (Últimas 20)</h2>
+        {% if logs %}
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Estado</th>
+                        <th>Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.start_time|date:"d/m/Y H:i:s" }}</td>
+                        <td>{{ log.end_time|date:"d/m/Y H:i:s"|default:"-" }}</td>
+                        <td>
+                             <span class="badge bg-{% if log.status == 'SUCCESS' %}success{% elif log.status == 'FAILED' %}danger{% elif log.status == 'RUNNING' %}info{% elif log.status == 'STARTED' %}primary{% else %}secondary{% endif %}">
+                                {{ log.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary view-log-btn" data-log-id="{{ log.id }}" data-bs-toggle="modal" data-bs-target="#logOutputModal">
+                                <i class="fas fa-file-alt"></i> Ver Salida
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% else %}
-            <i class="fas fa-times-circle text-danger"></i> No
+            <p>No hay registros de ejecución para este proceso todavía.</p>
         {% endif %}
-    </p>
-    <p><strong>Creado:</strong> {{ process.created_at|date:"d/m/Y H:i:s" }}</p>
-    <p><strong>Actualizado:</strong> {{ process.updated_at|date:"d/m/Y H:i:s" }}</p>
+    </div>
 </div>
 
-<div class="actions mt-3 mb-3">
-    <a href="{% url 'automations:run_process' process.id %}" class="btn btn-success" onclick="return confirm('¿Estás seguro de que deseas ejecutar este proceso ahora?');">
-        <i class="fas fa-play"></i> Ejecutar Ahora
-    </a>
-    <a href="{% url 'automations:process_update' process.pk %}" class="btn btn-warning"><i class="fas fa-edit"></i> Editar</a>
-    <a href="{% url 'automations:process_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
+<!-- Tareas Programadas para este Proceso -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-clock mr-2"></i> Programaciones para este Proceso</h4>
+        <a href="{% url 'automations:scheduledtask_create_for_process' process.pk %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nueva Programación
+        </a>
+    </div>
+    <div class="card-body">
+        {% with tasks=process.scheduled_tasks.all %}
+            {% if tasks %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Resumen de Programación</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for task in tasks %}
+                        <tr>
+                            <td>{{ task.get_resumen_programacion }}</td>
+                            <td>
+                                {% if task.activo %}
+                                    <span class="badge bg-success">Activa</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactiva</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'automations:scheduledtask_update' task.pk %}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'automations:scheduledtask_delete' task.pk %}" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <p class="text-center">No hay programaciones definidas para este proceso todavía.</p>
+            {% endif %}
+        {% endwith %}
+    </div>
 </div>
 
-<h2>Historial de Ejecuciones (Últimas 20)</h2>
-{% if logs %}
-    <table class="table table-sm">
-        <thead>
-            <tr>
-                <th>Inicio</th>
-                <th>Fin</th>
-                <th>Estado</th>
-                <th>Log</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ log.start_time|date:"d/m/Y H:i:s" }}</td>
-                <td>{{ log.end_time|date:"d/m/Y H:i:s"|default:"-" }}</td>
-                <td>
-                     <span class="badge bg-{% if log.status == 'SUCCESS' %}success{% elif log.status == 'FAILED' %}danger{% elif log.status == 'RUNNING' %}info{% elif log.status == 'STARTED' %}primary{% else %}secondary{% endif %}">
-                        {{ log.get_status_display }}
-                    </span>
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-outline-secondary view-log-btn" data-log-id="{{ log.id }}" data-bs-toggle="modal" data-bs-target="#logOutputModal">
-                        <i class="fas fa-file-alt"></i> Ver Salida
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No hay registros de ejecución para este proceso todavía.</p>
-{% endif %}
+<!-- Logs de Ejecución -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-file-alt mr-2"></i> Logs de Ejecución</h4>
+    </div>
+    <div class="card-body">
+        <h2>Historial de Ejecuciones (Últimas 20)</h2>
+        {% if logs %}
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Estado</th>
+                        <th>Log</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.start_time|date:"d/m/Y H:i:s" }}</td>
+                        <td>{{ log.end_time|date:"d/m/Y H:i:s"|default:"-" }}</td>
+                        <td>
+                             <span class="badge bg-{% if log.status == 'SUCCESS' %}success{% elif log.status == 'FAILED' %}danger{% elif log.status == 'RUNNING' %}info{% elif log.status == 'STARTED' %}primary{% else %}secondary{% endif %}">
+                                {{ log.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary view-log-btn" data-log-id="{{ log.id }}" data-bs-toggle="modal" data-bs-target="#logOutputModal">
+                                <i class="fas fa-file-alt"></i> Ver Salida
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No hay registros de ejecución para este proceso todavía.</p>
+        {% endif %}
+    </div>
+</div>
 
 <!-- Modal para mostrar salida del log -->
 <div class="modal fade" id="logOutputModal" tabindex="-1" aria-labelledby="logOutputModalLabel" aria-hidden="true">

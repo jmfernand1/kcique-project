@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django_filters',
     'automations',
     'adagio',
+    'django_q',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -107,11 +110,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "es-es"
 
-TIME_ZONE = 'America/Bogota'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -119,7 +122,7 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
 
@@ -138,3 +141,20 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
+
+# Configuración para django-q
+Q_CLUSTER = {
+    "name": "kcique_project",
+    "workers": 4,
+    "recycle": 500,
+    "timeout": 60,
+    "compress": True,
+    "save_limit": 250,
+    "queue_limit": 500,
+    "cpu_affinity": 1,
+    "label": "Django Q",
+    "orm": "default",  # Usar la base de datos por defecto de Django
+}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

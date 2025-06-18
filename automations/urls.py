@@ -4,11 +4,19 @@ from . import views
 app_name = 'automations'
 
 urlpatterns = [
-    path('', views.process_list, name='process_list'),
-    path('process/<int:pk>/', views.process_detail, name='process_detail'),
-    path('process/create/', views.process_create, name='process_create'),
-    path('process/<int:pk>/update/', views.process_update, name='process_update'),
-    path('process/<int:pk>/delete/', views.process_delete, name='process_delete'),
+    path('', views.ProcessListView.as_view(), name='process_list'),
+    path('process/<int:pk>/', views.ProcessDetailView.as_view(), name='process_detail'),
+    path('process/new/', views.ProcessCreateView.as_view(), name='process_create'),
+    path('process/<int:pk>/update/', views.ProcessUpdateView.as_view(), name='process_update'),
+    path('process/<int:pk>/delete/', views.ProcessDeleteView.as_view(), name='process_delete'),
     path('process/<int:process_id>/run/', views.run_process_view, name='run_process'),
     path('log/<int:log_id>/output/', views.get_log_output, name='get_log_output'), # Para polling de logs
+
+    # URLs para Tareas Programadas
+    path('scheduled-tasks/', views.ScheduledTaskListView.as_view(), name='scheduledtask_list'),
+    path('scheduled-tasks/new/', views.ScheduledTaskCreateView.as_view(), name='scheduledtask_create'),
+    # Crear tarea para un proceso específico
+    path('process/<int:process_pk>/schedule/', views.ScheduledTaskCreateView.as_view(), name='scheduledtask_create_for_process'),
+    path('scheduled-tasks/<int:pk>/update/', views.ScheduledTaskUpdateView.as_view(), name='scheduledtask_update'),
+    path('scheduled-tasks/<int:pk>/delete/', views.ScheduledTaskDeleteView.as_view(), name='scheduledtask_delete'),
 ] 

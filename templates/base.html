@@ -20,22 +20,31 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'automations:process_list' %}">
-                            <i class="fas fa-cogs"></i> Automations
-                        </a>
+                        <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdagio" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-bolt"></i> Adagio
+                        <a class="nav-link dropdown-toggle" href="#" id="adagioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                           <i class="fas fa-bolt"></i> Adagio
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdagio">
+                        <ul class="dropdown-menu" aria-labelledby="adagioDropdown">
                             <li><a class="dropdown-item" href="{% url 'adagio:dashboard_adagio' %}">Dashboard</a></li>
-                            <li><a class="dropdown-item" href="{% url 'adagio:casopendiente_list' %}">Casos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'adagio:casopendiente_list' %}">Ver Casos</a></li>
                         </ul>
                     </li>
-                    <!-- Aquí se añadirían más enlaces a otras aplicaciones -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="automationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cogs"></i> Automatizaciones
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="automationsDropdown">
+                            <li><a class="dropdown-item" href="{% url 'automations:process_list' %}">Ver Procesos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'automations:scheduledtask_list' %}">Programar Tareas</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}"><i class="fas fa-user-shield"></i> Admin</a>
+                    </li>
                 </ul>
             </div>
         </div>

@@ -6,11 +6,13 @@ from .forms import CSVUploadForm, CasoDebitoForm
 import pandas as pd
 import io # Para manejar el archivo en memoria
 from django.contrib import messages # Para mostrar mensajes al usuario
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import CasoDebitoSerializer
+from django.http import HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 
 # Reutilizaremos la lógica de carga del script, pero adaptada a una vista
 # Idealmente, esta lógica podría estar en un archivo de 'servicios' o 'utils' de la app.
@@ -179,6 +181,7 @@ class CasoDebitoDetailView(DetailView):
     model = CasoDebito
     template_name = 'adagio/casopendiente_detail.html'
     context_object_name = 'caso'
+    success_url = reverse_lazy('adagio:casopendiente_list')
 
 
 class CasoDebitoCreateView(CreateView):

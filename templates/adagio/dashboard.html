@@ -111,35 +111,44 @@
             <div class="card shadow">
                 <div class="card-body">
                     <h5 class="card-title"><i class="fas fa-clock mr-2"></i>Promedio de Ejecución (Finalizados)</h5>
-                    <p class="card-text h2">{{ promedio_ejecucion|default:"N/A" }}</p>
+                    <p class="card-text h2">{{ promedio_ejecucion|default:"N/A"|format_duration }}</p>
                     <small class="text-muted">(Tiempo desde inicio a fin de proceso para casos finalizados)</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-file-csv mr-2"></i>Cargar Casos desde CSV</h4>
-        </div>
-        <div class="card-body">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="form-group">
-                    {{ form.csv_file.label_tag }}
-                    <div class="custom-file">
-                        {{ form.csv_file|attr:"class:custom-file-input" }}
-                        <label class="custom-file-label" for="{{ form.csv_file.id_for_label }}">Seleccionar archivo...</label>
-                    </div>
-                    {% if form.csv_file.help_text %}
-                        <small class="form-text text-muted">{{ form.csv_file.help_text }}</small>
-                    {% endif %}
-                    {% for error in form.csv_file.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
+    <div class="row">
+        <!-- Columna para Carga de Archivos -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-file-csv mr-2"></i>Cargar Casos desde Archivo CSV</h4>
                 </div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-upload mr-2"></i>Cargar Archivo</button>
-            </form>
+                <div class="card-body">
+                    <p>Sube un archivo CSV para crear o actualizar casos de débito de forma masiva. El archivo debe contener la columna <code>cod_caso_bizagi</code>.</p>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for error in form.non_field_errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            {{ form.csv_file.label_tag }}
+                            <div class="custom-file">
+                                {{ form.csv_file|add_class:"custom-file-input" }}
+                                <label class="custom-file-label" for="{{ form.csv_file.id_for_label }}">Seleccionar archivo...</label>
+                            </div>
+                            {% if form.csv_file.help_text %}
+                                <small class="form-text text-muted">{{ form.csv_file.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.csv_file.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-upload mr-2"></i>Cargar Archivo</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
