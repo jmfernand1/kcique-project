@@ -40,6 +40,8 @@
                         <ul class="dropdown-menu" aria-labelledby="automationsDropdown">
                             <li><a class="dropdown-item" href="{% url 'automations:process_list' %}">Ver Procesos</a></li>
                             <li><a class="dropdown-item" href="{% url 'automations:scheduledtask_list' %}">Programar Tareas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'automations:cluster_status' %}"><i class="fas fa-server"></i> Estado del Clúster</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">

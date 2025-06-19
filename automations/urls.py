@@ -19,4 +19,7 @@ urlpatterns = [
     path('process/<int:process_pk>/schedule/', views.ScheduledTaskCreateView.as_view(), name='scheduledtask_create_for_process'),
     path('scheduled-tasks/<int:pk>/update/', views.ScheduledTaskUpdateView.as_view(), name='scheduledtask_update'),
     path('scheduled-tasks/<int:pk>/delete/', views.ScheduledTaskDeleteView.as_view(), name='scheduledtask_delete'),
+
+    # URL para el estado del clúster
+    path('cluster-status/', views.cluster_status_view, name='cluster_status'),
 ] 

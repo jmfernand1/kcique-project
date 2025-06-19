@@ -8,7 +8,9 @@ from .forms import AutomatedProcessForm, ScheduledTaskForm
 from .process_executor import run_process_threaded # Importamos la función
 from django_q.tasks import schedule
 from django_q.models import Schedule
+from django_q.status import Stat
 from django.utils import timezone
+from datetime import timedelta
 
 # Vista para la página de inicio
 def home_view(request):
@@ -105,22 +107,30 @@ def get_log_output(request, log_id):
         'end_time': log.end_time.strftime('%Y-%m-%d %H:%M:%S') if log.end_time else None
     })
 
+# --- Vista para el Estado del Clúster ---
+
+def cluster_status_view(request):
+    """
+    Muestra el estado en vivo del clúster de Django Q.
+    """
+    cluster_stats = Stat.get_all()
+    context = {
+        'cluster_stats': cluster_stats
+    }
+    return render(request, 'automations/cluster_status.html', context)
+
 # --- Vistas para Tareas Programadas (ScheduledTask) ---
 
 def _programar_en_django_q(tarea: ScheduledTask):
     """Crea o actualiza una tarea en Django Q para un Proceso Automatizado."""
     
-    # Nombre único para la tarea en Django Q
     nombre_tarea_q = f"scheduled-process-{tarea.pk}"
 
     # Si la tarea ya tiene un ID en Q, la borramos para evitar duplicados.
     if tarea.id_tarea_django_q:
-        try:
-            Schedule.objects.filter(name=tarea.id_tarea_django_q).delete()
-        except Schedule.DoesNotExist:
-            pass # No pasa nada si no existía
+        Schedule.objects.filter(name=tarea.id_tarea_django_q).delete()
 
-    # Si la tarea no está activa, no la programamos.
+    # Si la tarea no está activa, no la programamos y nos aseguramos de que no tenga ID.
     if not tarea.activo:
         tarea.id_tarea_django_q = ''
         tarea.save(update_fields=['id_tarea_django_q'])
@@ -128,7 +138,7 @@ def _programar_en_django_q(tarea: ScheduledTask):
 
     opciones = {
         'func': 'automations.tasks.execute_automated_process',
-        'args': f'{tarea.process.id}', # Pasamos el ID del proceso a ejecutar
+        'args': f'{tarea.process.id}',
         'name': nombre_tarea_q,
         'repeats': -1, # Repetir indefinidamente por defecto
         'cluster': 'default'
@@ -144,21 +154,49 @@ def _programar_en_django_q(tarea: ScheduledTask):
     elif tarea.frecuencia == 'HORAS':
         opciones['schedule_type'] = Schedule.HOURLY
         opciones['hours'] = tarea.intervalo
-    elif tarea.frecuencia == 'DIARIO':
-        opciones['schedule_type'] = Schedule.DAILY
-        opciones['next_run'] = timezone.now().replace(hour=tarea.hora_ejecucion.hour, minute=tarea.hora_ejecucion.minute)
-    elif tarea.frecuencia == 'SEMANAL':
-        opciones['schedule_type'] = Schedule.WEEKLY
-        # Nota: django-q usa el día de la semana de next_run. Podríamos calcularlo
-        # exactamente, pero por simplicidad lo dejamos que se ajuste solo.
-        opciones['next_run'] = timezone.now().replace(hour=tarea.hora_ejecucion.hour, minute=tarea.hora_ejecucion.minute)
-    elif tarea.frecuencia == 'MENSUAL':
-        opciones['schedule_type'] = Schedule.MONTHLY
-        opciones['day_of_month'] = str(tarea.dia_mes)
-        opciones['next_run'] = timezone.now().replace(hour=tarea.hora_ejecucion.hour, minute=tarea.hora_ejecucion.minute)
+    elif tarea.frecuencia in ['DIARIO', 'SEMANAL', 'MENSUAL']:
+        if not tarea.hora_ejecucion:
+            return
+
+        if tarea.frecuencia == 'DIARIO':
+            opciones['schedule_type'] = Schedule.DAILY
+        elif tarea.frecuencia == 'SEMANAL':
+            opciones['schedule_type'] = Schedule.WEEKLY
+        elif tarea.frecuencia == 'MENSUAL':
+            opciones['schedule_type'] = Schedule.MONTHLY
+            if tarea.dia_mes:
+                opciones['day_of_month'] = str(tarea.dia_mes)
+
+        current_tz = timezone.get_current_timezone()
+        now_in_tz = timezone.localtime(timezone.now(), current_tz)
+        
+        # Crear la próxima ejecución como una fecha/hora "naive" y luego hacerla "aware"
+        next_run_naive = now_in_tz.combine(now_in_tz.date(), tarea.hora_ejecucion)
+        next_run_aware = timezone.make_aware(next_run_naive, current_tz)
+
+        if tarea.frecuencia == 'SEMANAL':
+            if tarea.dia_semana:
+                # Ajustar al día de la semana correcto
+                days_ahead = tarea.dia_semana - next_run_aware.isoweekday()
+                if days_ahead < 0 or (days_ahead == 0 and next_run_aware < now_in_tz):
+                    # Si el día ya pasó esta semana, o es hoy pero la hora ya pasó
+                    days_ahead += 7
+                next_run_aware += timedelta(days=days_ahead)
+        
+        # Para DIARIO y MENSUAL, si la hora ya pasó hoy, avanzar.
+        # Para MENSUAL, django-q se encargará del resto, solo necesitamos darle una fecha futura.
+        elif tarea.frecuencia in ['DIARIO', 'MENSUAL'] and next_run_aware < now_in_tz:
+             next_run_aware += timedelta(days=1)
+        
+        opciones['next_run'] = next_run_aware
+    else:
+        # Frecuencia no soportada, no programar.
+        tarea.id_tarea_django_q = ''
+        tarea.save(update_fields=['id_tarea_django_q'])
+        return
     
-    # Crear la nueva tarea programada
-    s = schedule(**opciones)
+    # Crear la nueva tarea programada en Django Q
+    schedule(**opciones)
     
     # Guardar el nombre único de la tarea de Django Q para futuras referencias
     tarea.id_tarea_django_q = nombre_tarea_q
