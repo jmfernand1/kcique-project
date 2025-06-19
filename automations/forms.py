@@ -58,7 +58,7 @@ class ScheduledTaskForm(forms.ModelForm):
             'hora_ejecucion': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'fecha_ejecucion_unica': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
             'intervalo': forms.NumberInput(attrs={'placeholder': 'Ej. 15'}),
-            'dia_mes': forms.NumberInput(attrs={'placeholder': 'Ej. 28'}),
+            'dia_mes': forms.NumberInput(attrs={'placeholder': 'Ej. 28', 'min': 1, 'max': 31}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -81,4 +81,34 @@ class ScheduledTaskForm(forms.ModelForm):
                 self.fields['process'].disabled = False
         else:
             # Si es el formulario general, mostramos un placeholder.
-            self.fields['process'].empty_label = "Seleccione un proceso para automatizar..." 
+            self.fields['process'].empty_label = "Seleccione un proceso para automatizar"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        frecuencia = cleaned_data.get('frecuencia')
+
+        if frecuencia == 'MINUTOS' or frecuencia == 'HORAS':
+            if not cleaned_data.get('intervalo'):
+                self.add_error('intervalo', 'Este campo es requerido para la frecuencia seleccionada.')
+        
+        elif frecuencia == 'DIARIO':
+            if not cleaned_data.get('hora_ejecucion'):
+                self.add_error('hora_ejecucion', 'La hora de ejecución es requerida para la frecuencia diaria.')
+
+        elif frecuencia == 'SEMANAL':
+            if not cleaned_data.get('hora_ejecucion'):
+                self.add_error('hora_ejecucion', 'La hora de ejecución es requerida.')
+            if not cleaned_data.get('dia_semana'):
+                self.add_error('dia_semana', 'El día de la semana es requerido.')
+
+        elif frecuencia == 'MENSUAL':
+            if not cleaned_data.get('hora_ejecucion'):
+                self.add_error('hora_ejecucion', 'La hora de ejecución es requerida.')
+            if not cleaned_data.get('dia_mes'):
+                self.add_error('dia_mes', 'El día del mes es requerido.')
+
+        elif frecuencia == 'UNA_VEZ':
+            if not cleaned_data.get('fecha_ejecucion_unica'):
+                self.add_error('fecha_ejecucion_unica', 'La fecha y hora son requeridas para una ejecución única.')
+
+        return cleaned_data 
