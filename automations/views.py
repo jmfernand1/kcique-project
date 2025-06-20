@@ -141,7 +141,7 @@ def _programar_en_django_q(tarea: ScheduledTask):
         'args': f'{tarea.process.id}',
         'name': nombre_tarea_q,
         'repeats': -1, # Repetir indefinidamente por defecto
-        'cluster': 'default'
+        'cluster': 'kcique_project'
     }
 
     if tarea.frecuencia == 'UNA_VEZ':

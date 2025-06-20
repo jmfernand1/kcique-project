@@ -46,40 +46,6 @@
             </a>
             <a href="{% url 'automations:process_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver a la Lista</a>
         </div>
-
-        <h2>Historial de Ejecuciones (Últimas 20)</h2>
-        {% if logs %}
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>Inicio</th>
-                        <th>Fin</th>
-                        <th>Estado</th>
-                        <th>Log</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for log in logs %}
-                    <tr>
-                        <td>{{ log.start_time|date:"d/m/Y H:i:s" }}</td>
-                        <td>{{ log.end_time|date:"d/m/Y H:i:s"|default:"-" }}</td>
-                        <td>
-                             <span class="badge bg-{% if log.status == 'SUCCESS' %}success{% elif log.status == 'FAILED' %}danger{% elif log.status == 'RUNNING' %}info{% elif log.status == 'STARTED' %}primary{% else %}secondary{% endif %}">
-                                {{ log.get_status_display }}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-secondary view-log-btn" data-log-id="{{ log.id }}" data-bs-toggle="modal" data-bs-target="#logOutputModal">
-                                <i class="fas fa-file-alt"></i> Ver Salida
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No hay registros de ejecución para este proceso todavía.</p>
-        {% endif %}
     </div>
 </div>
 
