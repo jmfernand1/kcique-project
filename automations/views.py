@@ -10,7 +10,7 @@ from django_q.tasks import schedule
 from django_q.models import Schedule
 from django_q.status import Stat
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 # Vista para la página de inicio
 def home_view(request):
@@ -138,7 +138,7 @@ def _programar_en_django_q(tarea: ScheduledTask):
 
     opciones = {
         'func': 'automations.tasks.execute_automated_process',
-        'args': f'{tarea.process.id}',
+        'kwargs': {'task_id': tarea.process.id},
         'name': nombre_tarea_q,
         'repeats': -1, # Repetir indefinidamente por defecto
         'cluster': 'kcique_project'
@@ -171,7 +171,7 @@ def _programar_en_django_q(tarea: ScheduledTask):
         now_in_tz = timezone.localtime(timezone.now(), current_tz)
         
         # Crear la próxima ejecución como una fecha/hora "naive" y luego hacerla "aware"
-        next_run_naive = now_in_tz.combine(now_in_tz.date(), tarea.hora_ejecucion)
+        next_run_naive = datetime.combine(now_in_tz.date(), tarea.hora_ejecucion)
         next_run_aware = timezone.make_aware(next_run_naive, current_tz)
 
         if tarea.frecuencia == 'SEMANAL':
