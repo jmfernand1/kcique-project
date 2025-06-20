@@ -136,11 +136,10 @@ def _programar_en_django_q(tarea: ScheduledTask):
         tarea.save(update_fields=['id_tarea_django_q'])
         return
 
+    # Opciones para la programación en Django Q
     opciones = {
-        'func': 'automations.tasks.execute_automated_process',
-        'kwargs': {'task_id': tarea.process.id},
         'name': nombre_tarea_q,
-        'repeats': -1, # Repetir indefinidamente por defecto
+        'repeats': -1,  # Repetir indefinidamente por defecto
         'cluster': 'kcique_project'
     }
 
@@ -148,6 +147,9 @@ def _programar_en_django_q(tarea: ScheduledTask):
         opciones['schedule_type'] = Schedule.ONCE
         opciones['next_run'] = tarea.fecha_ejecucion_unica
         opciones['repeats'] = 0
+        tarea.id_tarea_django_q = ''
+        tarea.save(update_fields=['id_tarea_django_q'])
+        return
     elif tarea.frecuencia == 'MINUTOS':
         opciones['schedule_type'] = Schedule.MINUTES
         opciones['minutes'] = tarea.intervalo
@@ -196,7 +198,11 @@ def _programar_en_django_q(tarea: ScheduledTask):
         return
     
     # Crear la nueva tarea programada en Django Q
-    schedule(**opciones)
+    schedule(
+        'automations.tasks.execute_automated_process',
+        task_id=tarea.process.id,  # Pasar como kwarg a la tarea
+        **opciones
+    )
     
     # Guardar el nombre único de la tarea de Django Q para futuras referencias
     tarea.id_tarea_django_q = nombre_tarea_q

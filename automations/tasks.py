@@ -2,11 +2,22 @@ from .process_executor import run_process_threaded
 from .models import AutomatedProcess
 from django.utils import timezone
 
-def execute_automated_process(task_id: int):
+def execute_automated_process(*args, **kwargs):
     """
     Tarea de Django-Q que busca un AutomatedProcess por su ID
     y lo ejecuta usando el process_executor.
+    Acepta kwargs para ser compatible con la forma en que django-q invoca las tareas.
     """
+    task_id = kwargs.get('task_id')
+    if task_id is None:
+        # Intenta obtener el ID del primer argumento posicional si no está en kwargs
+        if args:
+            task_id = args[0]
+        else:
+            error_msg = f"Error: No se pudo ejecutar la tarea programada. No se proporcionó 'task_id'."
+            print(error_msg)
+            return error_msg
+            
     try:
         process = AutomatedProcess.objects.get(id=task_id)
         print(f"[{timezone.now()}] Iniciando tarea programada para el proceso: '{process.name}' (ID: {task_id})")
