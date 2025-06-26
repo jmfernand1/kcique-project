@@ -61,6 +61,8 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
                 'codigo_del_banco': str(row.get('codigo_del_banco', '')) or None,
                 'codigo_ciudad': str(row.get('codigo_ciudad', '')) or None,
                 'tipo_debito': str(row.get('tipo_debito', 'AL TITULAR')) or 'AL TITULAR',
+                'autoriza': str(row.get('autoriza', '')) or None,
+                'fecha_desembolso': str(row.get('fecha_desembolso', '')) or None,
                 'estado': str(row.get('estado', 'PENDIENTE')) or 'PENDIENTE',
                 'proceso_actualizador': nombre_script,
             }
@@ -167,7 +169,8 @@ class CasoDebitoListView(ListView):
             queryset = queryset.filter(
                 Q(cod_caso_bizagi__icontains=query) |
                 Q(num_prestamo__icontains=query) |
-                Q(docsoldv__icontains=query)
+                Q(docsoldv__icontains=query) |
+                Q(autoriza__icontains=query)
             )
         return queryset
 

@@ -7,6 +7,8 @@ class CasoDebitoAdmin(admin.ModelAdmin):
         'cod_caso_bizagi',
         'estado',
         'num_prestamo',
+        'autoriza',
+        'fecha_desembolso',
         'tipo_de_cuenta',
         'fecha_creacion',
         'fecha_actualizacion',
@@ -21,7 +23,7 @@ class CasoDebitoAdmin(admin.ModelAdmin):
             'fields': ('cod_caso_bizagi', 'num_prestamo', 'estado')
         }),
         ('Detalles de Cuenta', {
-            'fields': ('docsoldv', 'tipo_de_cuenta', 'numcta_debito', 'secuencia_cta', 'codigo_del_banco', 'codigo_ciudad')
+            'fields': ('docsoldv', 'tipo_de_cuenta', 'numcta_debito', 'secuencia_cta', 'codigo_del_banco', 'codigo_ciudad', 'autoriza', 'fecha_desembolso')
         }),
         ('Trazabilidad', {
             'fields': (
