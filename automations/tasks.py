@@ -24,7 +24,8 @@ def execute_automated_process(*args, **kwargs):
         process = AutomatedProcess.objects.get(id=task_id)
         
         # Verificar si hay restricciones de horario para tareas de tipo MINUTOS o HORAS
-        current_time = timezone.now().time()
+        # Obtener la hora actual en la zona horaria local configurada
+        current_time = timezone.localtime(timezone.now()).time()
         
         # Buscar tareas programadas que apliquen restricciones de horario
         scheduled_tasks = ScheduledTask.objects.filter(
