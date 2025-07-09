@@ -15,8 +15,11 @@ class CasoDebito(models.Model):
     TIPO_DEBITO_CHOICES = (
         ("AL TITULAR", "AL TITULAR"),
         ("A TERCEROS", "A TERCEROS"),
+        ("NO APLICA", "NO APLICA"),
     )
     tipo_debito = models.CharField(max_length=100, choices=TIPO_DEBITO_CHOICES, default='AL TITULAR', help_text="Tipo de débito.")
+    autoriza = models.CharField(max_length=10, blank=True, null=True, help_text="Indica quién autoriza el débito.")
+    fecha_desembolso = models.CharField(max_length=10, blank=True, null=True, help_text="Fecha en la que se realizó el desembolso.")
     
     ESTADO_CHOICES = (
         ("PENDIENTE", "PENDIENTE"),

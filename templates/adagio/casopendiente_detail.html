@@ -37,6 +37,12 @@
                         <dt class="col-sm-4">Núm. Préstamo:</dt>
                         <dd class="col-sm-8">{{ caso.num_prestamo|default:"-" }}</dd>
 
+                        <dt class="col-sm-4">Autoriza:</dt>
+                        <dd class="col-sm-8">{{ caso.autoriza|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Fecha Desembolso:</dt>
+                        <dd class="col-sm-8">{{ caso.fecha_desembolso|default:"-" }}</dd>
+
                         <dt class="col-sm-4">Docs Sol/Val:</dt>
                         <dd class="col-sm-8">{{ caso.docsoldv|default:"-" }}</dd>
                     </dl>

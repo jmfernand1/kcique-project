@@ -6,11 +6,13 @@ from .forms import CSVUploadForm, CasoDebitoForm
 import pandas as pd
 import io # Para manejar el archivo en memoria
 from django.contrib import messages # Para mostrar mensajes al usuario
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import CasoDebitoSerializer
+from django.http import HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 
 # Reutilizaremos la lógica de carga del script, pero adaptada a una vista
 # Idealmente, esta lógica podría estar en un archivo de 'servicios' o 'utils' de la app.
@@ -59,6 +61,8 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
                 'codigo_del_banco': str(row.get('codigo_del_banco', '')) or None,
                 'codigo_ciudad': str(row.get('codigo_ciudad', '')) or None,
                 'tipo_debito': str(row.get('tipo_debito', 'AL TITULAR')) or 'AL TITULAR',
+                'autoriza': str(row.get('autoriza', '')) or None,
+                'fecha_desembolso': str(row.get('fecha_desembolso', '')) or None,
                 'estado': str(row.get('estado', 'PENDIENTE')) or 'PENDIENTE',
                 'proceso_actualizador': nombre_script,
             }
@@ -165,7 +169,8 @@ class CasoDebitoListView(ListView):
             queryset = queryset.filter(
                 Q(cod_caso_bizagi__icontains=query) |
                 Q(num_prestamo__icontains=query) |
-                Q(docsoldv__icontains=query)
+                Q(docsoldv__icontains=query) |
+                Q(autoriza__icontains=query)
             )
         return queryset
 
@@ -179,6 +184,7 @@ class CasoDebitoDetailView(DetailView):
     model = CasoDebito
     template_name = 'adagio/casopendiente_detail.html'
     context_object_name = 'caso'
+    success_url = reverse_lazy('adagio:casopendiente_list')
 
 
 class CasoDebitoCreateView(CreateView):

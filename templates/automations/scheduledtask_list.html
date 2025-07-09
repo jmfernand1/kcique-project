@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Tareas Programadas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-clock mr-2"></i> Tareas Programadas</h1>
+        <a href="{% url 'automations:scheduledtask_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Programar Nueva Tarea
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h4 class="m-0 font-weight-bold text-primary">Listado de Programaciones</h4>
+        </div>
+        <div class="card-body">
+            {% if not tareas %}
+                <div class="alert alert-info text-center">
+                    <p>No hay tareas programadas todavía.</p>
+                    <a href="{% url 'automations:scheduledtask_create' %}" class="btn btn-info">¡Crea la primera!</a>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Proceso a Ejecutar</th>
+                                <th>Programación</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tarea in tareas %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'automations:process_detail' tarea.process.pk %}">{{ tarea.process.name }}</a>
+                                </td>
+                                <td>{{ tarea.get_resumen_programacion }}</td>
+                                <td>
+                                    {% if tarea.activo %}
+                                        <span class="badge bg-success">Activa</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactiva</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'automations:scheduledtask_update' tarea.pk %}" class="btn btn-sm btn-warning" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'automations:scheduledtask_delete' tarea.pk %}" class="btn btn-sm btn-danger" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+        <div class="card-footer">
+            <p class="text-muted small">
+                <strong>Nota:</strong> Para que las tareas se ejecuten, el procesador de tareas de Django Q debe estar corriendo en el servidor.
+                Inícielo con el comando: <code>python manage.py qcluster</code>.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

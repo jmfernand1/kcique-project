@@ -36,6 +36,8 @@
                                 <th>Cód. Bizagi</th>
                                 <th>Estado</th>
                                 <th>Núm. Préstamo</th>
+                                <th>Autoriza</th>
+                                <th>Fecha Desembolso</th>
                                 <th>Última Actualización</th>
                                 <th>Acciones</th>
                             </tr>
@@ -52,6 +54,8 @@
                                     </span>
                                 </td>
                                 <td>{{ caso.num_prestamo|default_if_none:"-" }}</td>
+                                <td>{{ caso.autoriza|default_if_none:"-" }}</td>
+                                <td>{{ caso.fecha_desembolso|default_if_none:"-" }}</td>
                                 <td>{{ caso.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
                                 <td>
                                     <a href="{% url 'adagio:casopendiente_detail' caso.pk %}" class="btn btn-sm btn-info" title="Ver Detalles">

@@ -36,3 +36,67 @@ class ProcessLog(models.Model):
 
     class Meta:
         ordering = ['-start_time']
+
+class ScheduledTask(models.Model):
+    """
+    Modelo para que los usuarios definan tareas programadas de forma sencilla,
+    vinculado a un Proceso Automatizado existente.
+    """
+    FRECUENCIA_CHOICES = (
+        ('MINUTOS', 'Cada X Minutos'),
+        ('HORAS', 'Cada X Horas'),
+        ('DIARIO', 'Diario'),
+        ('SEMANAL', 'Semanal'),
+        ('MENSUAL', 'Mensual'),
+        ('UNA_VEZ', 'Una Sola Vez'),
+    )
+
+    DIAS_SEMANA_CHOICES = (
+        (1, 'Lunes'), (2, 'Martes'), (3, 'Miércoles'),
+        (4, 'Jueves'), (5, 'Viernes'), (6, 'Sábado'), (7, 'Domingo'),
+    )
+
+    process = models.ForeignKey(AutomatedProcess, on_delete=models.CASCADE, related_name='scheduled_tasks', help_text="El proceso que se ejecutará.")
+    
+    frecuencia = models.CharField(max_length=10, choices=FRECUENCIA_CHOICES, default='DIARIO')
+    
+    intervalo = models.PositiveIntegerField(blank=True, null=True, help_text="Ej: 15 (para 'Cada 15 Minutos')")
+    hora_ejecucion = models.TimeField(help_text="La hora en que se debe ejecutar la tarea.", null=True, blank=True)
+    dia_semana = models.IntegerField(choices=DIAS_SEMANA_CHOICES, null=True, blank=True, help_text="El día de la semana para ejecuciones semanales.")
+    dia_mes = models.IntegerField(null=True, blank=True, help_text="El día del mes (1-31) para ejecuciones mensuales.")
+    fecha_ejecucion_unica = models.DateTimeField(null=True, blank=True, help_text="La fecha y hora para una ejecución única.")
+
+    activo = models.BooleanField(default=True, help_text="Desmarque para desactivar esta tarea sin eliminarla.")
+    
+    # Enlace a la tarea real en django-q
+    id_tarea_django_q = models.CharField(max_length=100, blank=True, editable=False)
+
+    def __str__(self):
+        return f"Programación para '{self.process.name}'"
+
+    def get_resumen_programacion(self):
+        """Genera un resumen legible de la programación."""
+        if not self.activo:
+            return "Inactiva"
+        
+        if self.frecuencia == 'UNA_VEZ':
+            if self.fecha_ejecucion_unica:
+                return f"Una vez, el {self.fecha_ejecucion_unica.strftime('%d/%m/%Y a las %H:%M')}"
+            return "Una vez (fecha no definida)"
+        if self.frecuencia in ['MINUTOS', 'HORAS']:
+            unidad = "minutos" if self.frecuencia == 'MINUTOS' else "horas"
+            return f"Cada {self.intervalo or 'N/A'} {unidad}"
+        if self.frecuencia == 'DIARIO':
+            return f"Todos los días a las {self.hora_ejecucion.strftime('%H:%M') if self.hora_ejecucion else 'N/A'}"
+        if self.frecuencia == 'SEMANAL':
+            dia = self.get_dia_semana_display() or 'N/A'
+            return f"Semanalmente, los {dia} a las {self.hora_ejecucion.strftime('%H:%M') if self.hora_ejecucion else 'N/A'}"
+        if self.frecuencia == 'MENSUAL':
+            return f"Mensualmente, el día {self.dia_mes or 'N/A'} a las {self.hora_ejecucion.strftime('%H:%M') if self.hora_ejecucion else 'N/A'}"
+        
+        return "Configuración incompleta"
+
+    class Meta:
+        verbose_name = "Tarea Programada"
+        verbose_name_plural = "Tareas Programadas"
+        ordering = ['process__name']
