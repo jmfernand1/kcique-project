@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 # Create your models here.
 
@@ -65,6 +67,10 @@ class ScheduledTask(models.Model):
     dia_semana = models.IntegerField(choices=DIAS_SEMANA_CHOICES, null=True, blank=True, help_text="El día de la semana para ejecuciones semanales.")
     dia_mes = models.IntegerField(null=True, blank=True, help_text="El día del mes (1-31) para ejecuciones mensuales.")
     fecha_ejecucion_unica = models.DateTimeField(null=True, blank=True, help_text="La fecha y hora para una ejecución única.")
+    
+    # Rango de horas de ejecución (solo para MINUTOS y HORAS)
+    hora_inicio = models.TimeField(null=True, blank=True, help_text="Hora de inicio del rango permitido para ejecución (solo para tareas por minutos/horas).")
+    hora_fin = models.TimeField(null=True, blank=True, help_text="Hora de fin del rango permitido para ejecución (solo para tareas por minutos/horas).")
 
     activo = models.BooleanField(default=True, help_text="Desmarque para desactivar esta tarea sin eliminarla.")
     
@@ -85,7 +91,10 @@ class ScheduledTask(models.Model):
             return "Una vez (fecha no definida)"
         if self.frecuencia in ['MINUTOS', 'HORAS']:
             unidad = "minutos" if self.frecuencia == 'MINUTOS' else "horas"
-            return f"Cada {self.intervalo or 'N/A'} {unidad}"
+            resultado = f"Cada {self.intervalo or 'N/A'} {unidad}"
+            if self.hora_inicio and self.hora_fin:
+                resultado += f" (solo de {self.hora_inicio.strftime('%H:%M')} a {self.hora_fin.strftime('%H:%M')})"
+            return resultado
         if self.frecuencia == 'DIARIO':
             return f"Todos los días a las {self.hora_ejecucion.strftime('%H:%M') if self.hora_ejecucion else 'N/A'}"
         if self.frecuencia == 'SEMANAL':
@@ -100,3 +109,38 @@ class ScheduledTask(models.Model):
         verbose_name = "Tarea Programada"
         verbose_name_plural = "Tareas Programadas"
         ordering = ['process__name']
+
+
+def reset_scheduled_tasks_on_startup():
+    """
+    Función para reiniciar las fechas de las tareas programadas al arrancar la aplicación.
+    Actualiza las fechas de próxima ejecución de todas las tareas activas para evitar
+    que se ejecuten múltiples veces tratando de 'ponerse al día'.
+    """
+    from django_q.models import Schedule
+    from django_q.tasks import schedule
+    
+    print(f"[{timezone.now()}] Reiniciando tareas programadas al arrancar la aplicación...")
+    
+    # Obtener todas las tareas activas
+    tareas_activas = ScheduledTask.objects.filter(activo=True)
+    tareas_reiniciadas = 0
+    
+    for tarea in tareas_activas:
+        try:
+            # Eliminar la tarea anterior de Django-Q si existe
+            if tarea.id_tarea_django_q:
+                Schedule.objects.filter(name=tarea.id_tarea_django_q).delete()
+            
+            # Reprogramar la tarea con fecha/hora actual
+            from automations.views import _programar_en_django_q
+            _programar_en_django_q(tarea)
+            
+            if tarea.frecuencia not in ['UNA_VEZ']:
+                print(f"  - Reiniciada: {tarea.process.name} ({tarea.get_resumen_programacion()})")
+                tareas_reiniciadas += 1
+                
+        except Exception as e:
+            print(f"  - Error al reiniciar tarea {tarea.process.name}: {e}")
+    
+    print(f"[{timezone.now()}] Reinicio completado. {tareas_reiniciadas} tareas reiniciadas.")

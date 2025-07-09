@@ -52,6 +52,8 @@ class ScheduledTaskForm(forms.ModelForm):
             'dia_semana', 
             'dia_mes', 
             'fecha_ejecucion_unica',
+            'hora_inicio',
+            'hora_fin',
             'activo'
         ]
         widgets = {
@@ -59,6 +61,8 @@ class ScheduledTaskForm(forms.ModelForm):
             'fecha_ejecucion_unica': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
             'intervalo': forms.NumberInput(attrs={'placeholder': 'Ej. 15'}),
             'dia_mes': forms.NumberInput(attrs={'placeholder': 'Ej. 28', 'min': 1, 'max': 31}),
+            'hora_inicio': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'hora_fin': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -90,6 +94,17 @@ class ScheduledTaskForm(forms.ModelForm):
         if frecuencia == 'MINUTOS' or frecuencia == 'HORAS':
             if not cleaned_data.get('intervalo'):
                 self.add_error('intervalo', 'Este campo es requerido para la frecuencia seleccionada.')
+            
+            # Validación para rango de horas (opcional)
+            hora_inicio = cleaned_data.get('hora_inicio')
+            hora_fin = cleaned_data.get('hora_fin')
+            
+            if hora_inicio and not hora_fin:
+                self.add_error('hora_fin', 'Si especifica una hora de inicio, debe especificar también una hora de fin.')
+            elif hora_fin and not hora_inicio:
+                self.add_error('hora_inicio', 'Si especifica una hora de fin, debe especificar también una hora de inicio.')
+            elif hora_inicio and hora_fin and hora_inicio >= hora_fin:
+                self.add_error('hora_fin', 'La hora de fin debe ser posterior a la hora de inicio.')
         
         elif frecuencia == 'DIARIO':
             if not cleaned_data.get('hora_ejecucion'):
