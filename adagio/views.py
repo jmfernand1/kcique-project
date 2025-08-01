@@ -11,8 +11,10 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import CasoDebitoSerializer
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.translation import gettext_lazy as _
+import csv
+from datetime import datetime
 
 # Reutilizaremos la lógica de carga del script, pero adaptada a una vista
 # Idealmente, esta lógica podría estar en un archivo de 'servicios' o 'utils' de la app.
@@ -227,3 +229,97 @@ class CasoDebitoViewSet(viewsets.ModelViewSet):
     serializer_class = CasoDebitoSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['estado', 'cod_caso_bizagi', 'num_prestamo']
+
+
+# Vistas de descarga CSV
+def generar_csv_response(queryset, filename_prefix):
+    """
+    Función auxiliar para generar respuesta CSV desde un queryset de CasoDebito
+    """
+    response = HttpResponse(content_type='text/csv')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    response['Content-Disposition'] = f'attachment; filename="{filename_prefix}_{timestamp}.csv"'
+    
+    writer = csv.writer(response)
+    
+    # Escribir encabezados
+    writer.writerow([
+        'ID', 'Código Caso Bizagi', 'Número Préstamo', 'Documentos Solicitados', 
+        'Documento Titular', 'Tipo de Cuenta', 'Número Cuenta Débito', 
+        'Secuencia Cuenta', 'Código del Banco', 'Código Ciudad', 'Tipo Débito',
+        'Autoriza', 'Fecha Desembolso', 'Estado', 'Fecha Creación', 
+        'Fecha Actualización', 'Fecha Inicio Proceso', 'Fecha Fin Proceso',
+        'Proceso Creador', 'Proceso Actualizador', 'Intentos Procesamiento',
+        'Último Error'
+    ])
+    
+    # Escribir datos
+    for caso in queryset:
+        writer.writerow([
+            caso.id,
+            caso.cod_caso_bizagi,
+            caso.num_prestamo or '',
+            caso.docsoldv or '',
+            caso.doctitulardv or '',
+            caso.tipo_de_cuenta or '',
+            caso.numcta_debito or '',
+            caso.secuencia_cta or '',
+            caso.codigo_del_banco or '',
+            caso.codigo_ciudad or '',
+            caso.tipo_debito,
+            caso.autoriza or '',
+            caso.fecha_desembolso or '',
+            caso.estado,
+            caso.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S') if caso.fecha_creacion else '',
+            caso.fecha_actualizacion.strftime('%Y-%m-%d %H:%M:%S') if caso.fecha_actualizacion else '',
+            caso.fecha_inicio_proceso.strftime('%Y-%m-%d %H:%M:%S') if caso.fecha_inicio_proceso else '',
+            caso.fecha_fin_proceso.strftime('%Y-%m-%d %H:%M:%S') if caso.fecha_fin_proceso else '',
+            caso.proceso_creador or '',
+            caso.proceso_actualizador or '',
+            caso.intentos_procesamiento,
+            caso.ultimo_error or ''
+        ])
+    
+    return response
+
+
+def descargar_todos_casos(request):
+    """Vista para descargar todos los casos"""
+    queryset = CasoDebito.objects.all().order_by('-fecha_creacion')
+    return generar_csv_response(queryset, 'todos_los_casos')
+
+
+def descargar_casos_pendientes(request):
+    """Vista para descargar casos pendientes"""
+    queryset = CasoDebito.objects.filter(estado='PENDIENTE').order_by('-fecha_creacion')
+    return generar_csv_response(queryset, 'casos_pendientes')
+
+
+def descargar_casos_pendiente_bizagi(request):
+    """Vista para descargar casos pendiente bizagi"""
+    queryset = CasoDebito.objects.filter(estado='PENDIENTE BIZAGI').order_by('-fecha_creacion')
+    return generar_csv_response(queryset, 'casos_pendiente_bizagi')
+
+
+def descargar_casos_grabado(request):
+    """Vista para descargar casos grabados"""
+    queryset = CasoDebito.objects.filter(estado='GRABADO').order_by('-fecha_creacion')
+    return generar_csv_response(queryset, 'casos_grabado')
+
+
+def descargar_casos_finalizado(request):
+    """Vista para descargar casos finalizados"""
+    queryset = CasoDebito.objects.filter(estado='FINALIZADO').order_by('-fecha_creacion')
+    return generar_csv_response(queryset, 'casos_finalizado')
+
+
+def descargar_casos_con_error(request):
+    """Vista para descargar casos con error"""
+    queryset = CasoDebito.objects.filter(estado='CON ERROR').order_by('-fecha_creacion')
+    return generar_csv_response(queryset, 'casos_con_error')
+
+
+def descargar_casos_validar(request):
+    """Vista para descargar casos a validar"""
+    queryset = CasoDebito.objects.filter(estado='VALIDAR').order_by('-fecha_creacion')
+    return generar_csv_response(queryset, 'casos_validar')

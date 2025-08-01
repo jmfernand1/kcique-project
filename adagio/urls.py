@@ -18,6 +18,15 @@ urlpatterns = [
     path('casos/<int:pk>/', views.CasoDebitoDetailView.as_view(), name='casopendiente_detail'),
     path('casos/<int:pk>/editar/', views.CasoDebitoUpdateView.as_view(), name='casopendiente_update'),
     path('casos/<int:pk>/eliminar/', views.CasoDebitoDeleteView.as_view(), name='casopendiente_delete'),
+    
+    # URLs de descarga CSV
+    path('descargar/todos/', views.descargar_todos_casos, name='descargar_todos_casos'),
+    path('descargar/pendientes/', views.descargar_casos_pendientes, name='descargar_casos_pendientes'),
+    path('descargar/pendiente-bizagi/', views.descargar_casos_pendiente_bizagi, name='descargar_casos_pendiente_bizagi'),
+    path('descargar/grabado/', views.descargar_casos_grabado, name='descargar_casos_grabado'),
+    path('descargar/finalizado/', views.descargar_casos_finalizado, name='descargar_casos_finalizado'),
+    path('descargar/con-error/', views.descargar_casos_con_error, name='descargar_casos_con_error'),
+    path('descargar/validar/', views.descargar_casos_validar, name='descargar_casos_validar'),
 ]
 
 # Añadir las URLs de la API
