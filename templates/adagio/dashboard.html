@@ -25,6 +25,11 @@
                         </div>
                         <i class="fas fa-folder-open fa-3x"></i>
                     </div>
+                    <div class="text-right mt-2">
+                        <a href="{% url 'adagio:descargar_todos_casos' %}" class="text-white" title="Descargar todos los casos" style="font-size: 1.2rem;">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -37,6 +42,11 @@
                             <p class="card-text display-4">{{ casos_pendientes }}</p>
                         </div>
                         <i class="fas fa-hourglass-start fa-3x"></i>
+                    </div>
+                    <div class="text-right mt-2">
+                        <a href="{% url 'adagio:descargar_casos_pendientes' %}" class="text-white" title="Descargar casos pendientes" style="font-size: 1.2rem;">
+                            <i class="fas fa-download"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -51,6 +61,11 @@
                         </div>
                         <i class="fas fa-tasks fa-3x"></i>
                     </div>
+                    <div class="text-right mt-2">
+                        <a href="{% url 'adagio:descargar_casos_pendiente_bizagi' %}" class="text-white" title="Descargar casos pendiente bizagi" style="font-size: 1.2rem;">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,6 +78,11 @@
                             <p class="card-text display-4">{{ casos_grabado }}</p>
                         </div>
                         <i class="fas fa-save fa-3x"></i>
+                    </div>
+                    <div class="text-right mt-2">
+                        <a href="{% url 'adagio:descargar_casos_grabado' %}" class="text-white" title="Descargar casos grabados" style="font-size: 1.2rem;">
+                            <i class="fas fa-download"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -77,6 +97,11 @@
                         </div>
                         <i class="fas fa-check-circle fa-3x"></i>
                     </div>
+                    <div class="text-right mt-2">
+                        <a href="{% url 'adagio:descargar_casos_finalizado' %}" class="text-white" title="Descargar casos finalizados" style="font-size: 1.2rem;">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,6 +115,11 @@
                         </div>
                         <i class="fas fa-exclamation-triangle fa-3x"></i>
                     </div>
+                    <div class="text-right mt-2">
+                        <a href="{% url 'adagio:descargar_casos_con_error' %}" class="text-white" title="Descargar casos con error" style="font-size: 1.2rem;">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -102,6 +132,11 @@
                             <p class="card-text display-4">{{ casos_validar_db }}</p>
                         </div>
                         <i class="fas fa-binoculars fa-3x"></i>
+                    </div>
+                    <div class="text-right mt-2">
+                        <a href="{% url 'adagio:descargar_casos_validar' %}" class="text-white" title="Descargar casos a validar" style="font-size: 1.2rem;">
+                            <i class="fas fa-download"></i>
+                        </a>
                     </div>
                 </div>
             </div>

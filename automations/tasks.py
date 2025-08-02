@@ -1,12 +1,14 @@
 from .process_executor import run_process_threaded
-from .models import AutomatedProcess
+from .models import AutomatedProcess, ScheduledTask
 from django.utils import timezone
+from datetime import time
 
 def execute_automated_process(*args, **kwargs):
     """
     Tarea de Django-Q que busca un AutomatedProcess por su ID
     y lo ejecuta usando el process_executor.
     Acepta kwargs para ser compatible con la forma en que django-q invoca las tareas.
+    Verifica el rango de horas si está configurado.
     """
     task_id = kwargs.get('task_id')
     if task_id is None:
@@ -20,6 +22,27 @@ def execute_automated_process(*args, **kwargs):
             
     try:
         process = AutomatedProcess.objects.get(id=task_id)
+        
+        # Verificar si hay restricciones de horario para tareas de tipo MINUTOS o HORAS
+        # Obtener la hora actual en la zona horaria local configurada
+        current_time = timezone.localtime(timezone.now()).time()
+        
+        # Buscar tareas programadas que apliquen restricciones de horario
+        scheduled_tasks = ScheduledTask.objects.filter(
+            process=process,
+            activo=True,
+            frecuencia__in=['MINUTOS', 'HORAS']
+        )
+        
+        # Verificar si alguna tarea tiene restricciones de horario
+        for task in scheduled_tasks:
+            if task.hora_inicio and task.hora_fin:
+                # Verificar si la hora actual está dentro del rango permitido
+                if not (task.hora_inicio <= current_time <= task.hora_fin):
+                    skip_msg = f"[{timezone.now()}] Omitiendo ejecución de '{process.name}' - fuera del horario permitido ({task.hora_inicio} - {task.hora_fin}). Hora actual: {current_time.strftime('%H:%M')}"
+                    print(skip_msg)
+                    return skip_msg
+        
         print(f"[{timezone.now()}] Iniciando tarea programada para el proceso: '{process.name}' (ID: {task_id})")
         
         # Usamos la función que ya maneja hilos y logging

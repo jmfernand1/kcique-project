@@ -44,6 +44,16 @@
                 <div class="row conditional-fields" id="field-intervalo" style="display: none;">
                     <div class="col-md-4 mb-3">{{ form.intervalo|as_crispy_field }}</div>
                 </div>
+                <div class="row conditional-fields" id="field-rango-horas" style="display: none;">
+                    <div class="col-md-4 mb-3">{{ form.hora_inicio|as_crispy_field }}</div>
+                    <div class="col-md-4 mb-3">{{ form.hora_fin|as_crispy_field }}</div>
+                    <div class="col-md-4 mb-3">
+                        <div class="alert alert-info mt-2">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Opcional:</strong> Si define ambos campos, la tarea solo se ejecutará dentro de este rango de horas.
+                        </div>
+                    </div>
+                </div>
                 <div class="row conditional-fields" id="field-hora_ejecucion" style="display: none;">
                     <div class="col-md-4 mb-3">{{ form.hora_ejecucion|as_crispy_field }}</div>
                 </div>
@@ -84,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Ocultar todos los campos condicionales primero
         document.getElementById('field-intervalo').style.display = 'none';
+        document.getElementById('field-rango-horas').style.display = 'none';
         document.getElementById('field-hora_ejecucion').style.display = 'none';
         document.getElementById('field-dia_semana').style.display = 'none';
         document.getElementById('field-dia_mes').style.display = 'none';
@@ -92,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mostrar campos basados en la selección
         if (value === 'MINUTOS' || value === 'HORAS') {
             document.getElementById('field-intervalo').style.display = 'block';
+            document.getElementById('field-rango-horas').style.display = 'block';
         } else if (value === 'DIARIO') {
             document.getElementById('field-hora_ejecucion').style.display = 'block';
         } else if (value === 'SEMANAL') {
