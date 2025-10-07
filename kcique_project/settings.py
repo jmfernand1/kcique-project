@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django_filters',
     'automations',
     'adagio',
+    'dexter',
     'django_q',
     'crispy_forms',
     'crispy_bootstrap5',
