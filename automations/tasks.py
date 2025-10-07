@@ -1,4 +1,4 @@
-from .process_executor import run_process_threaded
+from .process_executor import run_process_threaded, is_process_running
 from .models import AutomatedProcess, ScheduledTask
 from django.utils import timezone
 from datetime import time
@@ -9,6 +9,7 @@ def execute_automated_process(*args, **kwargs):
     y lo ejecuta usando el process_executor.
     Acepta kwargs para ser compatible con la forma en que django-q invoca las tareas.
     Verifica el rango de horas si está configurado.
+    Verifica que el proceso no esté ya en ejecución.
     """
     task_id = kwargs.get('task_id')
     if task_id is None:
@@ -22,6 +23,12 @@ def execute_automated_process(*args, **kwargs):
             
     try:
         process = AutomatedProcess.objects.get(id=task_id)
+        
+        # Verificar si el proceso ya está en ejecución
+        if is_process_running(task_id):
+            skip_msg = f"[{timezone.now()}] Omitiendo ejecución de '{process.name}' - el proceso ya está en ejecución."
+            print(skip_msg)
+            return skip_msg
         
         # Verificar si hay restricciones de horario para tareas de tipo MINUTOS o HORAS
         # Obtener la hora actual en la zona horaria local configurada
@@ -46,10 +53,10 @@ def execute_automated_process(*args, **kwargs):
         print(f"[{timezone.now()}] Iniciando tarea programada para el proceso: '{process.name}' (ID: {task_id})")
         
         # Usamos la función que ya maneja hilos y logging
-        run_process_threaded(task_id)
+        result = run_process_threaded(task_id)
         
         print(f"[{timezone.now()}] Tarea programada para '{process.name}' enviada a ejecución.")
-        return f"Proceso '{process.name}' ejecutado exitosamente."
+        return result
         
     except AutomatedProcess.DoesNotExist:
         error_msg = f"Error: No se pudo ejecutar la tarea programada. Proceso con ID {task_id} no encontrado."
