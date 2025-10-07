@@ -1,6 +1,124 @@
 from django.db import models
+from django.utils import timezone
 
-# Create your models here.
+
+# ============================================================================
+# MODELOS DE TRACKING/LOG PARA ETL
+# ============================================================================
+
+class EjecucionETL(models.Model):
+    """
+    Modelo para rastrear cada ejecución completa del ETL.
+    Permite tener un historial de todas las ejecuciones.
+    """
+    TIPO_CHOICES = [
+        ('DESEMBOLSO', 'Proceso de Desembolso'),
+        ('GARANTIA', 'Proceso de Garantía'),
+    ]
+    
+    ESTADO_CHOICES = [
+        ('INICIADO', 'Iniciado'),
+        ('EN_PROGRESO', 'En Progreso'),
+        ('COMPLETADO', 'Completado'),
+        ('FALLIDO', 'Fallido'),
+        ('PAUSADO', 'Pausado'),
+    ]
+    
+    tipo_proceso = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='INICIADO')
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_fin = models.DateTimeField(null=True, blank=True)
+    total_registros = models.IntegerField(default=0)
+    registros_procesados = models.IntegerField(default=0)
+    registros_exitosos = models.IntegerField(default=0)
+    registros_fallidos = models.IntegerField(default=0)
+    ultima_etapa_ejecutada = models.CharField(max_length=100, null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
+    mensaje_error = models.TextField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-fecha_inicio']
+        verbose_name = "Ejecución ETL"
+        verbose_name_plural = "Ejecuciones ETL"
+    
+    def __str__(self):
+        return f"{self.tipo_proceso} - {self.estado} ({self.fecha_inicio.strftime('%Y-%m-%d %H:%M')})"
+
+
+class ProcesoDesembolso(models.Model):
+    """Tracking de cada desembolso en el proceso ETL"""
+    ETAPAS = [
+        ('PENDIENTE', 'Pendiente'),
+        ('GRABAR_CARGOS_FIJOS', 'Grabar Cargos Fijos'),
+        ('DESEMBOLSO', 'Desembolso'),
+        ('FRACCIONAR', 'Fraccionar'),
+        ('SELECCIONAR_PAGO', 'Seleccionar Pago'),
+        ('AUTORIZAR', 'Autorizar'),
+        ('COMPLETADO', 'Completado'),
+        ('ERROR', 'Error'),
+    ]
+    
+    ejecucion = models.ForeignKey(EjecucionETL, on_delete=models.CASCADE, related_name='procesos_desembolso')
+    desembolso = models.ForeignKey('Desembolso', on_delete=models.CASCADE, related_name='procesos_etl')
+    etapa_actual = models.CharField(max_length=30, choices=ETAPAS, default='PENDIENTE')
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_ultima_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_completado = models.DateTimeField(null=True, blank=True)
+    intentos = models.IntegerField(default=0)
+    mensaje_error = models.TextField(null=True, blank=True)
+    datos_etapa = models.JSONField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-fecha_inicio']
+        verbose_name = "Proceso de Desembolso"
+        verbose_name_plural = "Procesos de Desembolso"
+        indexes = [
+            models.Index(fields=['etapa_actual']),
+            models.Index(fields=['ejecucion', 'etapa_actual']),
+        ]
+    
+    def __str__(self):
+        return f"Desembolso {self.desembolso.referencia} - {self.etapa_actual}"
+
+
+class ProcesoGarantia(models.Model):
+    """Tracking de cada garantía en el proceso ETL"""
+    ETAPAS = [
+        ('PENDIENTE', 'Pendiente'),
+        ('GRABAR_INFO_VEHICULO', 'Grabar Info Vehículo'),
+        ('GRABAR_INFO_POLIZA', 'Grabar Info Póliza'),
+        ('DESAFILIAR_GARANTIA_REPETIDA', 'Desafiliar Garantía Repetida'),
+        ('COMPLETADO', 'Completado'),
+        ('ERROR', 'Error'),
+    ]
+    
+    ejecucion = models.ForeignKey(EjecucionETL, on_delete=models.CASCADE, related_name='procesos_garantia')
+    garantia = models.ForeignKey('Garantia', on_delete=models.CASCADE, related_name='procesos_etl')
+    etapa_actual = models.CharField(max_length=35, choices=ETAPAS, default='PENDIENTE')
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_ultima_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_completado = models.DateTimeField(null=True, blank=True)
+    intentos = models.IntegerField(default=0)
+    mensaje_error = models.TextField(null=True, blank=True)
+    datos_etapa = models.JSONField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-fecha_inicio']
+        verbose_name = "Proceso de Garantía"
+        verbose_name_plural = "Procesos de Garantía"
+        indexes = [
+            models.Index(fields=['etapa_actual']),
+            models.Index(fields=['ejecucion', 'etapa_actual']),
+        ]
+    
+    def __str__(self):
+        return f"Garantía {self.garantia.placa} - {self.etapa_actual}"
+
+
+# ============================================================================
+# MODELOS DE DATOS PRINCIPALES
+# ============================================================================
+
 class Desembolso(models.Model):
     referencia = models.CharField(max_length=100, unique=True)
     obligacion = models.BigIntegerField()
@@ -27,6 +145,7 @@ class Desembolso(models.Model):
 
     def __str__(self):
         return f"Desembolso {self.referencia}"
+
 
 class CargoFijo(models.Model):
     desembolso = models.ForeignKey(Desembolso, related_name='cargos_fijos', on_delete=models.CASCADE)

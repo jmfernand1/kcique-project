@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Desembolso, CargoFijo, Garantia
+from .models import Desembolso, CargoFijo, Garantia, EjecucionETL, ProcesoDesembolso, ProcesoGarantia
 
+
+# ============================================================================
+# ADMIN DE DATOS PRINCIPALES
+# ============================================================================
 
 class CargoFijoInline(admin.TabularInline):
     """Inline para mostrar cargos fijos dentro del admin de Desembolso"""
@@ -20,7 +24,6 @@ class DesembolsoAdmin(admin.ModelAdmin):
     search_fields = ['referencia', 'obligacion', 'id_cliente', 'nit_beneficiario', 'aliado']
     readonly_fields = ['id']
     inlines = [CargoFijoInline]
-    # Necesario para que funcione autocomplete_fields en otros modelos
     ordering = ['-id']
     
     fieldsets = (
@@ -93,6 +96,108 @@ class GarantiaAdmin(admin.ModelAdmin):
         }),
         ('Otros Datos', {
             'fields': ('folio_electronico', 'fecha_prenda', 'fecha_desembolso'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+# ============================================================================
+# ADMIN DE TRACKING ETL
+# ============================================================================
+
+@admin.register(EjecucionETL)
+class EjecucionETLAdmin(admin.ModelAdmin):
+    """Administrador para EjecucionETL"""
+    list_display = [
+        'id', 'tipo_proceso', 'estado', 'fecha_inicio', 
+        'registros_procesados', 'total_registros', 'mostrar_progreso'
+    ]
+    list_filter = ['tipo_proceso', 'estado', 'fecha_inicio']
+    search_fields = ['descripcion']
+    readonly_fields = ['fecha_inicio', 'fecha_fin']
+    date_hierarchy = 'fecha_inicio'
+    
+    fieldsets = (
+        ('Información General', {
+            'fields': ('tipo_proceso', 'estado', 'descripcion')
+        }),
+        ('Estadísticas', {
+            'fields': (
+                'total_registros', 'registros_procesados', 
+                'registros_exitosos', 'registros_fallidos'
+            )
+        }),
+        ('Fechas', {
+            'fields': ('fecha_inicio', 'fecha_fin')
+        }),
+        ('Errores', {
+            'fields': ('ultima_etapa_ejecutada', 'mensaje_error'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def mostrar_progreso(self, obj):
+        """Muestra el progreso en porcentaje"""
+        if obj.total_registros == 0:
+            return "0%"
+        progreso = (obj.registros_procesados / obj.total_registros) * 100
+        return f"{progreso:.1f}%"
+    mostrar_progreso.short_description = 'Progreso'
+
+
+@admin.register(ProcesoDesembolso)
+class ProcesoDesembolsoAdmin(admin.ModelAdmin):
+    """Administrador para ProcesoDesembolso"""
+    list_display = [
+        'id', 'desembolso', 'ejecucion', 'etapa_actual', 
+        'intentos', 'fecha_ultima_actualizacion'
+    ]
+    list_filter = ['etapa_actual', 'ejecucion']
+    search_fields = ['desembolso__referencia']
+    readonly_fields = ['fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado']
+    date_hierarchy = 'fecha_inicio'
+    
+    fieldsets = (
+        ('Información', {
+            'fields': ('ejecucion', 'desembolso', 'etapa_actual')
+        }),
+        ('Estado', {
+            'fields': ('intentos', 'mensaje_error')
+        }),
+        ('Fechas', {
+            'fields': ('fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado')
+        }),
+        ('Datos de Etapa', {
+            'fields': ('datos_etapa',),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(ProcesoGarantia)
+class ProcesoGarantiaAdmin(admin.ModelAdmin):
+    """Administrador para ProcesoGarantia"""
+    list_display = [
+        'id', 'garantia', 'ejecucion', 'etapa_actual', 
+        'intentos', 'fecha_ultima_actualizacion'
+    ]
+    list_filter = ['etapa_actual', 'ejecucion']
+    search_fields = ['garantia__placa', 'garantia__referencia']
+    readonly_fields = ['fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado']
+    date_hierarchy = 'fecha_inicio'
+    
+    fieldsets = (
+        ('Información', {
+            'fields': ('ejecucion', 'garantia', 'etapa_actual')
+        }),
+        ('Estado', {
+            'fields': ('intentos', 'mensaje_error')
+        }),
+        ('Fechas', {
+            'fields': ('fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado')
+        }),
+        ('Datos de Etapa', {
+            'fields': ('datos_etapa',),
             'classes': ('collapse',)
         }),
     )
