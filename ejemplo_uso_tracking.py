@@ -6,6 +6,7 @@ client = ETLTrackingClient("http://localhost:8000/dexter/api")
 
 # 2. Iniciar ejecución
 ejecucion_id = client.iniciar_ejecucion_desembolso(total_registros=100)
+mis_desembolsos = 
 
 # 3. Procesar cada desembolso
 for desembolso_id in mis_desembolsos:
@@ -13,8 +14,11 @@ for desembolso_id in mis_desembolsos:
     
     try:
         # Tu lógica de etapa 1
-        grabar_cargos_fijos(desembolso_id)
-        client.avanzar_etapa_desembolso(proceso_id, 'GRABAR_CARGOS_FIJOS')
+        try:
+            grabar_cargos_fijos(desembolso_id)
+            client.avanzar_etapa_desembolso(proceso_id, 'GRABAR_CARGOS_FIJOS')
+        except Exception as e:
+            client.marcar_error_desembolso(proceso_id, str(e))
         
         # Tu lógica de etapa 2
         ejecutar_desembolso(desembolso_id)
