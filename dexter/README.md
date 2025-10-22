@@ -1,12 +1,122 @@
-# Dexter - API para ETL de Desembolsos y Garantías
+# Dexter - Sistema Completo de ETL y Tracking
 
 ## 📋 Descripción
 
-**Dexter** es una aplicación Django que proporciona una API REST completa para la gestión de desembolsos, cargos fijos y garantías vehiculares. Está diseñada para integrarse con procesos ETL (Extract, Transform, Load) en Python.
+**Dexter** es una aplicación Django completa que proporciona:
+- 🎨 **Frontend Web**: Interfaz visual moderna para monitoreo y seguimiento de procesos ETL
+- 🔌 **API REST**: API completa para la gestión programática de desembolsos, cargos fijos y garantías
+- 📊 **Sistema de Tracking**: Seguimiento detallado de cada ejecución ETL con visibilidad de etapas individuales
+
+Diseñada para integrarse perfectamente con procesos ETL (Extract, Transform, Load) en Python, permitiendo tanto la operación manual como automatizada.
+
+## 🎨 Frontend Web - Interfaz Visual
+
+### Acceso Rápido
+- **Dashboard Principal**: http://localhost:8000/dexter/
+- **Lista de Ejecuciones**: http://localhost:8000/dexter/ejecuciones/
+
+### Características del Frontend
+
+#### 📊 Dashboard Principal
+- Vista general con estadísticas en tiempo real
+- Tarjetas de métricas por estado (Completadas, En Progreso, Fallidas, etc.)
+- Estadísticas por tipo de proceso (Desembolsos vs Garantías)
+- Tiempo promedio de ejecución
+- Tabla de ejecuciones recientes con barras de progreso
+
+#### 📋 Lista de Ejecuciones
+- Filtros avanzados por tipo de proceso, estado y búsqueda
+- Paginación inteligente (20 registros por página)
+- Visualización clara del progreso de cada ejecución
+- Información detallada de registros procesados, exitosos y fallidos
+
+#### 🔍 Detalle de Ejecución
+La vista más completa que incluye:
+
+**Información General:**
+- Estado actual y fechas de inicio/fin
+- Métricas de progreso visual
+- Descripción y mensajes de error
+
+**Distribución por Etapas:**
+- Tarjetas visuales por cada etapa del proceso
+- Contador de casos en cada etapa
+- Códigos de color según el estado
+
+**Procesos Individuales:**
+- Tabla detallada de cada caso (desembolso o garantía)
+- Etapa actual de cada proceso
+- Modales emergentes con detalles de errores
+- Número de intentos y fechas de actualización
+
+### Características de UX/UI
+
+✅ **Diseño consistente** con la aplicación Adagio
+✅ **Responsive** - funciona en desktop y móvil
+✅ **Barras de progreso** animadas
+✅ **Badges de color** para estados
+✅ **Modales** para información detallada
+✅ **Iconos Font Awesome** para mejor comprensión
+✅ **Filtros en tiempo real** sin recargar página
+
+### Datos de Prueba
+
+Para poblar el sistema con datos de prueba y visualizar el frontend:
+
+```bash
+# En el shell de Django
+python manage.py shell
+
+# Ejecutar:
+from dexter.crear_datos_prueba import crear_datos_prueba
+crear_datos_prueba()
+```
+
+Esto creará:
+- 15 desembolsos de ejemplo
+- 10 garantías de ejemplo
+- 5 ejecuciones ETL en diferentes estados
+- Procesos individuales en diversas etapas
+
+### Documentación del Frontend
+
+Para documentación detallada del frontend, consulta:
+- `FRONTEND_GUIA.md` - Guía completa de uso
+- `crear_datos_prueba.py` - Script para generar datos de prueba
 
 ## 🗄️ Modelos de Datos
 
-### 1. Desembolso
+### Modelos de Tracking ETL
+
+#### EjecucionETL
+Registra cada ejecución completa del ETL con:
+- Tipo de proceso (DESEMBOLSO o GARANTIA)
+- Estado (INICIADO, EN_PROGRESO, COMPLETADO, FALLIDO, PAUSADO)
+- Contadores de registros totales, procesados, exitosos y fallidos
+- Fechas de inicio y fin
+- Última etapa ejecutada y mensajes de error
+
+#### ProcesoDesembolso
+Tracking individual de cada desembolso en el ETL con etapas:
+1. PENDIENTE
+2. GRABAR_CARGOS_FIJOS
+3. DESEMBOLSO
+4. FRACCIONAR
+5. SELECCIONAR_PAGO
+6. AUTORIZAR
+7. COMPLETADO / ERROR
+
+#### ProcesoGarantia
+Tracking individual de cada garantía en el ETL con etapas:
+1. PENDIENTE
+2. GRABAR_INFO_VEHICULO
+3. GRABAR_INFO_POLIZA
+4. DESAFILIAR_GARANTIA_REPETIDA
+5. COMPLETADO / ERROR
+
+### Modelos de Datos Principales
+
+#### 1. Desembolso
 Modelo principal que almacena información de desembolsos financieros.
 
 **Campos principales:**
@@ -20,7 +130,7 @@ Modelo principal que almacena información de desembolsos financieros.
 - Información de cuenta destino
 - Información de tramos (plazo, tasa, amortización)
 
-### 2. CargoFijo
+#### 2. CargoFijo
 Cargos fijos asociados a un desembolso (relación ForeignKey).
 
 **Campos principales:**
@@ -31,7 +141,7 @@ Cargos fijos asociados a un desembolso (relación ForeignKey).
 - `periodicidad` - Frecuencia del cargo
 - `valor` - Valor del cargo
 
-### 3. Garantía
+#### 3. Garantía
 Información de garantías vehiculares asociadas a obligaciones.
 
 **Campos principales:**

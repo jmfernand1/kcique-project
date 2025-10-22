@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Ejecuciones ETL{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-list-alt mr-2"></i> Ejecuciones ETL</h1>
+        <a href="{% url 'dexter:dashboard_dexter' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h4 class="m-0 font-weight-bold text-primary">Filtros y Búsqueda</h4>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{% url 'dexter:ejecucion_list' %}">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="search">Buscar:</label>
+                        <input type="text" class="form-control" id="search" name="q" 
+                               placeholder="Tipo, descripción o estado..." 
+                               value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="tipo_proceso">Tipo de Proceso:</label>
+                        <select class="form-control" id="tipo_proceso" name="tipo_proceso">
+                            <option value="">Todos</option>
+                            {% for value, label in tipo_proceso_choices %}
+                                <option value="{{ value }}" {% if tipo_proceso_filter == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="estado">Estado:</label>
+                        <select class="form-control" id="estado" name="estado">
+                            <option value="">Todos</option>
+                            {% for value, label in estado_choices %}
+                                <option value="{{ value }}" {% if estado_filter == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" type="submit">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+            {% if search_query or tipo_proceso_filter or estado_filter %}
+                <div class="text-right">
+                    <a href="{% url 'dexter:ejecucion_list' %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-times"></i> Limpiar Filtros
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h4 class="m-0 font-weight-bold text-primary">Listado de Ejecuciones</h4>
+        </div>
+        <div class="card-body">
+            {% if ejecuciones %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Tipo Proceso</th>
+                                <th>Estado</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Progreso</th>
+                                <th>Total</th>
+                                <th>Exitosos</th>
+                                <th>Fallidos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ejecucion in ejecuciones %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'dexter:ejecucion_detail' ejecucion.pk %}">#{{ ejecucion.id }}</a>
+                                </td>
+                                <td>
+                                    <span class="badge {% if ejecucion.tipo_proceso == 'DESEMBOLSO' %}bg-dark{% else %}bg-secondary{% endif %}">
+                                        {{ ejecucion.get_tipo_proceso_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if ejecucion.estado == 'COMPLETADO' %}success{% elif ejecucion.estado == 'EN_PROGRESO' %}info{% elif ejecucion.estado == 'FALLIDO' %}danger{% elif ejecucion.estado == 'INICIADO' %}warning{% else %}secondary{% endif %}">
+                                        {{ ejecucion.get_estado_display }}
+                                    </span>
+                                </td>
+                                <td>{{ ejecucion.fecha_inicio|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if ejecucion.fecha_fin %}
+                                        {{ ejecucion.fecha_fin|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ejecucion.total_registros > 0 %}
+                                        <div class="progress" style="height: 25px;">
+                                            {% widthratio ejecucion.registros_procesados ejecucion.total_registros 100 as progreso %}
+                                            <div class="progress-bar {% if progreso == 100 %}bg-success{% elif progreso > 50 %}bg-info{% else %}bg-warning{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ progreso }}%;" 
+                                                 aria-valuenow="{{ progreso }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ progreso }}%
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ ejecucion.total_registros }}</td>
+                                <td class="text-success">{{ ejecucion.registros_exitosos }}</td>
+                                <td class="text-danger">{{ ejecucion.registros_fallidos }}</td>
+                                <td>
+                                    <a href="{% url 'dexter:ejecucion_detail' ejecucion.pk %}" class="btn btn-sm btn-info" title="Ver Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if is_paginated %}
+                    <nav aria-label="Paginación de ejecuciones">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if tipo_proceso_filter %}&tipo_proceso={{ tipo_proceso_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Primera">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if tipo_proceso_filter %}&tipo_proceso={{ tipo_proceso_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Anterior">
+                                        &laquo;
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;&laquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number > 4 and forloop.first %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+
+                                {% if i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                    {% if page_obj.number == i %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&q={{ search_query }}{% endif %}{% if tipo_proceso_filter %}&tipo_proceso={{ tipo_proceso_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if page_obj.number < paginator.num_pages|add:'-3' and forloop.last %}
+                                     <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if tipo_proceso_filter %}&tipo_proceso={{ tipo_proceso_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Siguiente">
+                                        &raquo;
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if tipo_proceso_filter %}&tipo_proceso={{ tipo_proceso_filter }}{% endif %}{% if estado_filter %}&estado={{ estado_filter }}{% endif %}" aria-label="Última">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% else %}
+                {% if search_query or tipo_proceso_filter or estado_filter %}
+                     <p class="text-center">No se encontraron ejecuciones que coincidan con los filtros aplicados.</p>
+                     <div class="text-center">
+                        <a href="{% url 'dexter:ejecucion_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Limpiar Filtros
+                        </a>
+                     </div>
+                {% else %}
+                    <p class="text-center">No hay ejecuciones para mostrar.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

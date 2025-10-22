@@ -17,7 +17,14 @@ router.register(r'ejecuciones', views.EjecucionETLViewSet, basename='ejecucion')
 router.register(r'procesos-desembolso', views.ProcesoDesembolsoViewSet, basename='proceso-desembolso')
 router.register(r'procesos-garantia', views.ProcesoGarantiaViewSet, basename='proceso-garantia')
 
-# Las URLs de la API
+# URLs de la aplicación web (frontend)
 urlpatterns = [
+    path('', views.dashboard_dexter, name='dashboard_dexter'),
+    path('ejecuciones/', views.EjecucionETLListView.as_view(), name='ejecucion_list'),
+    path('ejecuciones/<int:pk>/', views.EjecucionETLDetailView.as_view(), name='ejecucion_detail'),
+]
+
+# Añadir las URLs de la API
+urlpatterns += [
     path('api/', include(router.urls)),
 ]
