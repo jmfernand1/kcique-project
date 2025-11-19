@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load dexter_extras %}
+
+{% block title %}Detalle de Ejecución #{{ ejecucion.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-file-alt mr-2"></i> Detalle de Ejecución #{{ ejecucion.id }}</h1>
+        <div>
+            <a href="{% url 'dexter:ejecucion_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Listado
+            </a>
+            <a href="{% url 'dexter:dashboard_dexter' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Información General de la Ejecución -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h4 class="m-0 font-weight-bold text-primary">Información General</h4>
+            <span class="badge bg-{% if ejecucion.estado == 'COMPLETADO' %}success{% elif ejecucion.estado == 'EN_PROGRESO' %}info{% elif ejecucion.estado == 'FALLIDO' %}danger{% elif ejecucion.estado == 'INICIADO' %}warning{% else %}secondary{% endif %}" style="font-size: 1.2rem;">
+                {{ ejecucion.get_estado_display }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID:</dt>
+                        <dd class="col-sm-8">#{{ ejecucion.id }}</dd>
+
+                        <dt class="col-sm-4">Tipo de Proceso:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge {% if ejecucion.tipo_proceso == 'DESEMBOLSO' %}bg-dark{% else %}bg-secondary{% endif %}">
+                                {{ ejecucion.get_tipo_proceso_display }}
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Estado:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-{% if ejecucion.estado == 'COMPLETADO' %}success{% elif ejecucion.estado == 'EN_PROGRESO' %}info{% elif ejecucion.estado == 'FALLIDO' %}danger{% elif ejecucion.estado == 'INICIADO' %}warning{% else %}secondary{% endif %}">
+                                {{ ejecucion.get_estado_display }}
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Fecha Inicio:</dt>
+                        <dd class="col-sm-8">{{ ejecucion.fecha_inicio|date:"d/m/Y H:i:s" }}</dd>
+
+                        <dt class="col-sm-4">Fecha Fin:</dt>
+                        <dd class="col-sm-8">
+                            {% if ejecucion.fecha_fin %}
+                                {{ ejecucion.fecha_fin|date:"d/m/Y H:i:s" }}
+                            {% else %}
+                                <span class="text-muted">En progreso...</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4">Última Etapa:</dt>
+                        <dd class="col-sm-8">{{ ejecucion.ultima_etapa_ejecutada|default:"-" }}</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-5">Total Registros:</dt>
+                        <dd class="col-sm-7"><strong>{{ ejecucion.total_registros }}</strong></dd>
+
+                        <dt class="col-sm-5">Registros Procesados:</dt>
+                        <dd class="col-sm-7"><strong>{{ ejecucion.registros_procesados }}</strong></dd>
+
+                        <dt class="col-sm-5">Registros Exitosos:</dt>
+                        <dd class="col-sm-7 text-success"><strong>{{ ejecucion.registros_exitosos }}</strong></dd>
+
+                        <dt class="col-sm-5">Registros Fallidos:</dt>
+                        <dd class="col-sm-7 text-danger"><strong>{{ ejecucion.registros_fallidos }}</strong></dd>
+
+                        <dt class="col-sm-5">Progreso:</dt>
+                        <dd class="col-sm-7">
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar {% if progreso_porcentaje == 100 %}bg-success{% elif progreso_porcentaje > 50 %}bg-info{% else %}bg-warning{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ progreso_porcentaje }}%;" 
+                                     aria-valuenow="{{ progreso_porcentaje }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ progreso_porcentaje }}%
+                                </div>
+                            </div>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            {% if ejecucion.descripcion %}
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h5>Descripción:</h5>
+                    <p>{{ ejecucion.descripcion }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if ejecucion.mensaje_error %}
+            <hr>
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="text-danger">Mensaje de Error:</h5>
+                    <pre class="p-2 bg-light border rounded text-danger">{{ ejecucion.mensaje_error }}</pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Estadísticas por Etapa -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h4 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-chart-pie mr-2"></i>Distribución por Etapas
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for etapa_nombre, stats in etapas_stats.items %}
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                        <div class="card {% if stats.code == 'ERROR' %}border-danger{% elif stats.code == 'COMPLETADO' %}border-success{% elif stats.code == 'PENDIENTE' %}border-warning{% else %}border-info{% endif %}">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">{{ etapa_nombre }}</h6>
+                                <p class="card-text display-4 {% if stats.code == 'ERROR' %}text-danger{% elif stats.code == 'COMPLETADO' %}text-success{% elif stats.code == 'PENDIENTE' %}text-warning{% else %}text-info{% endif %}">
+                                    {{ stats.count }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado de Procesos Individuales -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h4 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-tasks mr-2"></i>Procesos Individuales
+                <small class="text-muted">({{ procesos.count }} registros)</small>
+            </h4>
+        </div>
+        <div class="card-body">
+            {% if procesos %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-sm" width="100%" cellspacing="0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>ID</th>
+                                {% if tipo_proceso == 'DESEMBOLSO' %}
+                                    <th>Referencia Desembolso</th>
+                                    <th>Obligación</th>
+                                    <th>Valor</th>
+                                {% else %}
+                                    <th>Placa</th>
+                                    <th>Obligación</th>
+                                    <th>Referencia</th>
+                                {% endif %}
+                                <th>Etapa Actual</th>
+                                <th>Fecha Inicio</th>
+                                <th>Última Actualización</th>
+                                <th>Intentos</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proceso in procesos %}
+                            <tr class="{% if proceso.etapa_actual == 'ERROR' %}table-danger{% elif proceso.etapa_actual == 'COMPLETADO' %}table-success{% endif %}">
+                                <td>#{{ proceso.id }}</td>
+                                {% if tipo_proceso == 'DESEMBOLSO' %}
+                                    <td>
+                                        <strong>{{ proceso.desembolso.referencia }}</strong>
+                                    </td>
+                                    <td>{{ proceso.desembolso.obligacion }}</td>
+                                    <td>${{ proceso.desembolso.valor_desembolso|floatformat:2 }}</td>
+                                {% else %}
+                                    <td>
+                                        <strong>{{ proceso.garantia.placa }}</strong>
+                                    </td>
+                                    <td>{{ proceso.garantia.obligacion }}</td>
+                                    <td>{{ proceso.garantia.referencia|default:"-" }}</td>
+                                {% endif %}
+                                <td>
+                                    <span class="badge bg-{% if proceso.etapa_actual == 'COMPLETADO' %}success{% elif proceso.etapa_actual == 'ERROR' %}danger{% elif proceso.etapa_actual == 'PENDIENTE' %}warning{% else %}info{% endif %}">
+                                        {{ proceso.get_etapa_actual_display }}
+                                    </span>
+                                </td>
+                                <td>{{ proceso.fecha_inicio|date:"d/m H:i" }}</td>
+                                <td>{{ proceso.fecha_ultima_actualizacion|date:"d/m H:i" }}</td>
+                                <td>
+                                    <span class="badge {% if proceso.intentos > 3 %}bg-danger{% elif proceso.intentos > 1 %}bg-warning{% else %}bg-secondary{% endif %}">
+                                        {{ proceso.intentos }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if proceso.fecha_completado %}
+                                        <i class="fas fa-check-circle text-success" title="Completado"></i>
+                                    {% elif proceso.mensaje_error %}
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#errorModal{{ proceso.id }}">
+                                            <i class="fas fa-exclamation-circle"></i> Ver Error
+                                        </button>
+                                        
+                                        <!-- Modal para mostrar el error -->
+                                        <div class="modal fade" id="errorModal{{ proceso.id }}" tabindex="-1" aria-labelledby="errorModalLabel{{ proceso.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title" id="errorModalLabel{{ proceso.id }}">
+                                                            Error en Proceso #{{ proceso.id }}
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p><strong>Proceso:</strong> 
+                                                            {% if tipo_proceso == 'DESEMBOLSO' %}
+                                                                {{ proceso.desembolso.referencia }}
+                                                            {% else %}
+                                                                {{ proceso.garantia.placa }}
+                                                            {% endif %}
+                                                        </p>
+                                                        <p><strong>Etapa:</strong> {{ proceso.get_etapa_actual_display }}</p>
+                                                        <p><strong>Intentos:</strong> {{ proceso.intentos }}</p>
+                                                        <hr>
+                                                        <h6>Mensaje de Error:</h6>
+                                                        <pre class="p-2 bg-light border rounded">{{ proceso.mensaje_error }}</pre>
+                                                        
+                                                        {% if proceso.datos_etapa %}
+                                                        <hr>
+                                                        <h6>Datos de la Etapa:</h6>
+                                                        <pre class="p-2 bg-light border rounded">{{ proceso.datos_etapa|pprint }}</pre>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <i class="fas fa-spinner text-info" title="En progreso"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center">No hay procesos registrados para esta ejecución.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Script para mejorar la visualización de los modales
+document.addEventListener('DOMContentLoaded', function () {
+    // Puedes agregar lógica adicional aquí si es necesario
+});
+</script>
+{% endblock %}
+

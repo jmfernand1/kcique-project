@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load dexter_extras %}
+
+{% block title %}Dashboard Dexter{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-robot mr-2"></i> Dashboard Dexter - Tracking ETL</h1>
+    </div>
+
+    <h2><i class="fas fa-chart-bar mr-2"></i> Estadísticas Generales</h2>
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-primary shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Total Ejecuciones</h5>
+                            <p class="card-text display-4">{{ total_ejecuciones }}</p>
+                        </div>
+                        <i class="fas fa-cogs fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-info shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">En Progreso</h5>
+                            <p class="card-text display-4">{{ ejecuciones_en_progreso }}</p>
+                        </div>
+                        <i class="fas fa-spinner fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-success shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Completadas</h5>
+                            <p class="card-text display-4">{{ ejecuciones_completadas }}</p>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-danger shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Fallidas</h5>
+                            <p class="card-text display-4">{{ ejecuciones_fallidas }}</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-warning shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Iniciadas</h5>
+                            <p class="card-text display-4">{{ ejecuciones_iniciadas }}</p>
+                        </div>
+                        <i class="fas fa-play-circle fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-secondary shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Pausadas</h5>
+                            <p class="card-text display-4">{{ ejecuciones_pausadas }}</p>
+                        </div>
+                        <i class="fas fa-pause-circle fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white bg-dark shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Desembolsos</h5>
+                            <p class="card-text display-4">{{ total_desembolsos }}</p>
+                        </div>
+                        <i class="fas fa-money-bill-wave fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-white shadow" style="background-color: #6610f2;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Garantías</h5>
+                            <p class="card-text display-4">{{ total_garantias }}</p>
+                        </div>
+                        <i class="fas fa-shield-alt fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-12 mb-3">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-clock mr-2"></i>Promedio de Ejecución (Completadas)</h5>
+                    <p class="card-text h2">
+                        {% if promedio_ejecucion %}
+                            {{ promedio_ejecucion|format_duration }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </p>
+                    <small class="text-muted">(Tiempo desde inicio a fin de proceso para ejecuciones completadas)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h4 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-2"></i>Ejecuciones Recientes</h4>
+                    <a href="{% url 'dexter:ejecucion_list' %}" class="btn btn-primary">
+                        <i class="fas fa-list"></i> Ver Todas
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if ejecuciones_recientes %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                        <th>Fecha Inicio</th>
+                                        <th>Progreso</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ejecucion in ejecuciones_recientes %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'dexter:ejecucion_detail' ejecucion.pk %}">#{{ ejecucion.id }}</a>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if ejecucion.tipo_proceso == 'DESEMBOLSO' %}bg-dark{% else %}bg-secondary{% endif %}">
+                                                {{ ejecucion.get_tipo_proceso_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if ejecucion.estado == 'COMPLETADO' %}success{% elif ejecucion.estado == 'EN_PROGRESO' %}info{% elif ejecucion.estado == 'FALLIDO' %}danger{% elif ejecucion.estado == 'INICIADO' %}warning{% else %}secondary{% endif %}">
+                                                {{ ejecucion.get_estado_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ ejecucion.fecha_inicio|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            {% if ejecucion.total_registros > 0 %}
+                                                <div class="progress" style="height: 25px;">
+                                                    {% widthratio ejecucion.registros_procesados ejecucion.total_registros 100 as progreso %}
+                                                    <div class="progress-bar {% if progreso == 100 %}bg-success{% elif progreso > 50 %}bg-info{% else %}bg-warning{% endif %}" 
+                                                         role="progressbar" 
+                                                         style="width: {{ progreso }}%;" 
+                                                         aria-valuenow="{{ progreso }}" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                        {{ ejecucion.registros_procesados }}/{{ ejecucion.total_registros }}
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'dexter:ejecucion_detail' ejecucion.pk %}" class="btn btn-sm btn-info" title="Ver Detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center">No hay ejecuciones registradas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -24,4 +24,5 @@ urlpatterns = [
     path('automations/', include('automations.urls', namespace='automations')),
     path('', automations_views.home_view, name='home'),
     path('adagio/', include('adagio.urls')),
+    path('dexter/', include('dexter.urls')),
 ]
