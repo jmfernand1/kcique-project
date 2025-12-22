@@ -158,3 +158,8 @@ media/
 # mac hidden files
 .AppleDouble
 .AppleDB
+
+# django migrations
+dexter/migrations/
+adagio/migrations/
+automations/migrations/

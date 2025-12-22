@@ -18,7 +18,8 @@ from dexter.models import (
     ProcesoGarantia,
     Desembolso,
     Garantia,
-    CargoFijo
+    CargoFijo,
+    TipoDesembolso
 )
 
 
@@ -60,7 +61,8 @@ def crear_datos_prueba():
             tasa_tramo_2=random.uniform(15.0, 25.0),
             amortizacion_tramo_2="FRANCES",
             dia_pago_cuota=15,
-            estado="ACTIVO"
+            estado="PENDIENTE",
+            tipo_desembolso=TipoDesembolso.objects.first()
         )
         desembolsos.append(desembolso)
         

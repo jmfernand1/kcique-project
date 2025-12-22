@@ -124,13 +124,13 @@
             </h4>
         </div>
         <div class="card-body">
-            <div class="row">
+                            <div class="row">
                 {% for etapa_nombre, stats in etapas_stats.items %}
                     <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
-                        <div class="card {% if stats.code == 'ERROR' %}border-danger{% elif stats.code == 'COMPLETADO' %}border-success{% elif stats.code == 'PENDIENTE' %}border-warning{% else %}border-info{% endif %}">
+                        <div class="card {% if etapa_nombre == 'ERROR' %}border-danger{% elif etapa_nombre == 'COMPLETADO' %}border-success{% elif etapa_nombre == 'PENDIENTE' %}border-warning{% else %}border-info{% endif %}">
                             <div class="card-body text-center">
                                 <h6 class="card-title">{{ etapa_nombre }}</h6>
-                                <p class="card-text display-4 {% if stats.code == 'ERROR' %}text-danger{% elif stats.code == 'COMPLETADO' %}text-success{% elif stats.code == 'PENDIENTE' %}text-warning{% else %}text-info{% endif %}">
+                                <p class="card-text display-4 {% if etapa_nombre == 'ERROR' %}text-danger{% elif etapa_nombre == 'COMPLETADO' %}text-success{% elif etapa_nombre == 'PENDIENTE' %}text-warning{% else %}text-info{% endif %}">
                                     {{ stats.count }}
                                 </p>
                             </div>
@@ -165,8 +165,8 @@
                                     <th>Obligación</th>
                                     <th>Referencia</th>
                                 {% endif %}
-                                <th>Etapa Actual</th>
-                                <th>Fecha Inicio</th>
+                                <th>Etapa</th>
+                                <th>Fecha Creación</th>
                                 <th>Última Actualización</th>
                                 <th>Intentos</th>
                                 <th>Estado</th>
@@ -174,7 +174,7 @@
                         </thead>
                         <tbody>
                             {% for proceso in procesos %}
-                            <tr class="{% if proceso.etapa_actual == 'ERROR' %}table-danger{% elif proceso.etapa_actual == 'COMPLETADO' %}table-success{% endif %}">
+                            <tr class="{% if proceso.etapa.nombre == 'ERROR' %}table-danger{% elif proceso.etapa.nombre == 'COMPLETADO' %}table-success{% endif %}">
                                 <td>#{{ proceso.id }}</td>
                                 {% if tipo_proceso == 'DESEMBOLSO' %}
                                     <td>
@@ -190,12 +190,12 @@
                                     <td>{{ proceso.garantia.referencia|default:"-" }}</td>
                                 {% endif %}
                                 <td>
-                                    <span class="badge bg-{% if proceso.etapa_actual == 'COMPLETADO' %}success{% elif proceso.etapa_actual == 'ERROR' %}danger{% elif proceso.etapa_actual == 'PENDIENTE' %}warning{% else %}info{% endif %}">
-                                        {{ proceso.get_etapa_actual_display }}
+                                    <span class="badge bg-{% if proceso.etapa.nombre == 'COMPLETADO' %}success{% elif proceso.etapa.nombre == 'ERROR' %}danger{% elif proceso.etapa.nombre == 'PENDIENTE' %}warning{% else %}info{% endif %}">
+                                        {{ proceso.etapa.nombre }}
                                     </span>
                                 </td>
-                                <td>{{ proceso.fecha_inicio|date:"d/m H:i" }}</td>
-                                <td>{{ proceso.fecha_ultima_actualizacion|date:"d/m H:i" }}</td>
+                                <td>{{ proceso.fecha_creacion|date:"d/m H:i" }}</td>
+                                <td>{{ proceso.fecha_actualizacion|date:"d/m H:i" }}</td>
                                 <td>
                                     <span class="badge {% if proceso.intentos > 3 %}bg-danger{% elif proceso.intentos > 1 %}bg-warning{% else %}bg-secondary{% endif %}">
                                         {{ proceso.intentos }}
@@ -229,7 +229,7 @@
                                                                 {{ proceso.garantia.placa }}
                                                             {% endif %}
                                                         </p>
-                                                        <p><strong>Etapa:</strong> {{ proceso.get_etapa_actual_display }}</p>
+                                                        <p><strong>Etapa:</strong> {{ proceso.etapa.nombre }}</p>
                                                         <p><strong>Intentos:</strong> {{ proceso.intentos }}</p>
                                                         <hr>
                                                         <h6>Mensaje de Error:</h6>

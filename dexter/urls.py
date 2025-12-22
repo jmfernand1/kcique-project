@@ -1,21 +1,40 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-
+from .viewsets import (
+    DesembolsoViewSet,
+    CargoFijoViewSet,
+    GarantiaViewSet,
+    EjecucionETLViewSet,
+    ProcesoDesembolsoViewSet,
+    ProcesoGarantiaViewSet,
+    EtapaProcesoDesembolsoViewSet,
+    EtapaProcesoGarantiaViewSet,
+    TipoDesembolsoViewSet,
+    TipoGarantiaViewSet,
+    EtapaTipoDesembolsoViewSet,
+    EtapaTipoGarantiaViewSet
+)
 app_name = 'dexter'
 
 # Crear un router y registrar los viewsets
 router = DefaultRouter()
 
 # Endpoints de datos
-router.register(r'desembolsos', views.DesembolsoViewSet, basename='desembolso')
-router.register(r'cargos-fijos', views.CargoFijoViewSet, basename='cargofijo')
-router.register(r'garantias', views.GarantiaViewSet, basename='garantia')
+router.register(r'desembolsos', DesembolsoViewSet, basename='desembolso')
+router.register(r'cargos-fijos', CargoFijoViewSet, basename='cargofijo')
+router.register(r'garantias', GarantiaViewSet, basename='garantia')
 
 # Endpoints de tracking ETL
-router.register(r'ejecuciones', views.EjecucionETLViewSet, basename='ejecucion')
-router.register(r'procesos-desembolso', views.ProcesoDesembolsoViewSet, basename='proceso-desembolso')
-router.register(r'procesos-garantia', views.ProcesoGarantiaViewSet, basename='proceso-garantia')
+router.register(r'ejecuciones', EjecucionETLViewSet, basename='ejecucion')
+router.register(r'procesos-desembolso', ProcesoDesembolsoViewSet, basename='proceso-desembolso')
+router.register(r'procesos-garantia', ProcesoGarantiaViewSet, basename='proceso-garantia')
+router.register(r'etapas-proceso-desembolso', EtapaProcesoDesembolsoViewSet, basename='etapa-proceso-desembolso')
+router.register(r'etapas-proceso-garantia', EtapaProcesoGarantiaViewSet, basename='etapa-proceso-garantia')
+router.register(r'tipos-desembolso', TipoDesembolsoViewSet, basename='tipo-desembolso')
+router.register(r'tipos-garantia', TipoGarantiaViewSet, basename='tipo-garantia')
+router.register(r'etapas-desembolso', EtapaTipoDesembolsoViewSet, basename='etapa-desembolso')
+router.register(r'etapas-garantia', EtapaTipoGarantiaViewSet, basename='etapa-garantia')
 
 # URLs de la aplicación web (frontend)
 urlpatterns = [

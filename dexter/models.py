@@ -44,75 +44,347 @@ class EjecucionETL(models.Model):
     def __str__(self):
         return f"{self.tipo_proceso} - {self.estado} ({self.fecha_inicio.strftime('%Y-%m-%d %H:%M')})"
 
+class TipoDesembolso(models.Model):
+    """Tipo de desembolso"""
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.nombre
+    
+    class Meta:
+        verbose_name = "Tipo de Desembolso"
+        verbose_name_plural = "Tipos de Desembolso"
+
+class EtapaTipoDesembolso(models.Model):
+    """Etapa de tipo de desembolso"""
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(null=True, blank=True)
+    orden = models.IntegerField()
+    tipo_desembolso = models.ForeignKey(TipoDesembolso, on_delete=models.CASCADE, related_name='etapas')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.nombre
+    
+    class Meta:
+        verbose_name = "Etapa de Tipo de Desembolso"
+        verbose_name_plural = "Etapas de Tipo de Desembolso"
+        ordering = ['orden']
+
 
 class ProcesoDesembolso(models.Model):
-    """Tracking de cada desembolso en el proceso ETL"""
-    ETAPAS = [
+    """
+    Contenedor principal del proceso de un desembolso.
+    Agrupa todas las etapas que debe completar.
+    """
+    ESTADO_CHOICES = [
         ('PENDIENTE', 'Pendiente'),
-        ('GRABAR_CARGOS_FIJOS', 'Grabar Cargos Fijos'),
-        ('DESEMBOLSO', 'Desembolso'),
-        ('FRACCIONAR', 'Fraccionar'),
-        ('SELECCIONAR_PAGO', 'Seleccionar Pago'),
-        ('AUTORIZAR', 'Autorizar'),
+        ('EN_PROGRESO', 'En Progreso'),
         ('COMPLETADO', 'Completado'),
         ('ERROR', 'Error'),
+        ('PAUSADO', 'Pausado'),
     ]
     
     ejecucion = models.ForeignKey(EjecucionETL, on_delete=models.CASCADE, related_name='procesos_desembolso')
     desembolso = models.ForeignKey('Desembolso', on_delete=models.CASCADE, related_name='procesos_etl')
-    etapa_actual = models.CharField(max_length=30, choices=ETAPAS, default='PENDIENTE')
-    fecha_inicio = models.DateTimeField(auto_now_add=True)
-    fecha_ultima_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_completado = models.DateTimeField(null=True, blank=True)
+    estado_general = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='PENDIENTE'
+    )
+    
+    class Meta:
+        ordering = ['-fecha_creacion']
+        verbose_name = "Proceso de Desembolso"
+        verbose_name_plural = "Procesos de Desembolso"
+    
+    def __str__(self):
+        return f"Desembolso {self.desembolso.referencia}"
+    
+    @property
+    def etapa_actual(self):
+        """Retorna la etapa actual (primera pendiente o en progreso)"""
+        return self.etapas.filter(
+            estado__in=['PENDIENTE', 'EN_PROGRESO']
+        ).order_by('orden').first()
+    
+    @property
+    def siguiente_etapa(self):
+        """Retorna la siguiente etapa pendiente"""
+        return self.etapas.filter(estado='PENDIENTE').order_by('orden').first()
+    
+    def avanzar_a_siguiente_etapa(self):
+        """Avanza automáticamente a la siguiente etapa pendiente"""
+        etapa_actual = self.etapa_actual
+        if etapa_actual and etapa_actual.estado == 'COMPLETADO':
+            siguiente = self.siguiente_etapa
+            if siguiente:
+                siguiente.estado = 'EN_PROGRESO'
+                siguiente.save()
+                self.estado_general = 'EN_PROGRESO'
+                self.save()
+        return self.etapa_actual
+    
+    def marcar_como_completado(self):
+        """Marca el proceso como completado si todas las etapas están completadas"""
+        if self.etapas.filter(estado__in=['PENDIENTE', 'EN_PROGRESO', 'ERROR']).exists():
+            return False
+        self.estado_general = 'COMPLETADO'
+        self.fecha_completado = timezone.now()
+        self.save()
+        return True
+
+
+class EtapaProcesoDesembolso(models.Model):
+    """
+    Representa una etapa individual del proceso de desembolso.
+    Cada ProcesoDesembolso tiene múltiples EtapaProcesoDesembolso.
+    """
+    ESTADO_CHOICES = [
+        ('PENDIENTE', 'Pendiente'),
+        ('EN_PROGRESO', 'En Progreso'),
+        ('COMPLETADO', 'Completado'),
+        ('ERROR', 'Error'),
+        ('OMITIDA', 'Omitida'),
+    ]
+    
+    proceso = models.ForeignKey(
+        ProcesoDesembolso, 
+        on_delete=models.CASCADE, 
+        related_name='etapas'
+    )
+    etapa = models.ForeignKey(
+        EtapaTipoDesembolso, 
+        on_delete=models.CASCADE, 
+        related_name='procesos_etapas'
+    )
+    orden = models.IntegerField(help_text="Orden de ejecución de la etapa")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE')
+    fecha_inicio = models.DateTimeField(null=True, blank=True)
     fecha_completado = models.DateTimeField(null=True, blank=True)
     intentos = models.IntegerField(default=0)
     mensaje_error = models.TextField(null=True, blank=True)
-    datos_etapa = models.JSONField(null=True, blank=True)
+    datos_etapa = models.JSONField(null=True, blank=True, default=dict)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-fecha_inicio']
-        verbose_name = "Proceso de Desembolso"
-        verbose_name_plural = "Procesos de Desembolso"
-        indexes = [
-            models.Index(fields=['etapa_actual']),
-            models.Index(fields=['ejecucion', 'etapa_actual']),
-        ]
+        ordering = ['orden']
+        verbose_name = "Etapa de Proceso Desembolso"
+        verbose_name_plural = "Etapas de Proceso Desembolso"
+        unique_together = [['proceso', 'etapa']]
     
     def __str__(self):
-        return f"Desembolso {self.desembolso.referencia} - {self.etapa_actual}"
+        return f"{self.proceso.desembolso.referencia} - {self.etapa.nombre} ({self.estado})"
+    
+    def iniciar(self):
+        """Marca la etapa como en progreso"""
+        self.estado = 'EN_PROGRESO'
+        self.fecha_inicio = timezone.now()
+        self.intentos += 1
+        self.save()
+    
+    def completar(self, datos_etapa=None):
+        """Marca la etapa como completada"""
+        self.estado = 'COMPLETADO'
+        self.fecha_completado = timezone.now()
+        if datos_etapa:
+            if not self.datos_etapa:
+                self.datos_etapa = {}
+            self.datos_etapa.update(datos_etapa)
+        self.save()
+        # Avanzar al siguiente si es necesario
+        self.proceso.avanzar_a_siguiente_etapa()
+        self.proceso.marcar_como_completado()
+    
+    def marcar_error(self, mensaje_error, datos_etapa=None):
+        """Marca la etapa como error"""
+        self.estado = 'ERROR'
+        self.mensaje_error = mensaje_error
+        self.intentos += 1
+        if datos_etapa:
+            if not self.datos_etapa:
+                self.datos_etapa = {}
+            self.datos_etapa.update(datos_etapa)
+        self.save()
+        self.proceso.estado_general = 'ERROR'
+        self.proceso.save()
 
+class TipoGarantia(models.Model):
+    """Tipo de garantía"""
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.nombre
+    
+    class Meta:
+        verbose_name = "Tipo de Garantía"
+        verbose_name_plural = "Tipos de Garantía"
+
+class EtapaTipoGarantia(models.Model):
+    """Etapa de tipo de garantía"""
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(null=True, blank=True)
+    orden = models.IntegerField()
+    tipo_garantia = models.ForeignKey(TipoGarantia, on_delete=models.CASCADE, related_name='etapas')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.nombre
+    
+    class Meta:
+        verbose_name = "Etapa de Tipo de Garantía"
+        verbose_name_plural = "Etapas de Tipo de Garantía"
+        ordering = ['orden']
 
 class ProcesoGarantia(models.Model):
-    """Tracking de cada garantía en el proceso ETL"""
-    ETAPAS = [
+    """
+    Contenedor principal del proceso de una garantía.
+    Agrupa todas las etapas que debe completar.
+    """
+    ESTADO_CHOICES = [
         ('PENDIENTE', 'Pendiente'),
-        ('GRABAR_INFO_VEHICULO', 'Grabar Info Vehículo'),
-        ('GRABAR_INFO_POLIZA', 'Grabar Info Póliza'),
-        ('DESAFILIAR_GARANTIA_REPETIDA', 'Desafiliar Garantía Repetida'),
+        ('EN_PROGRESO', 'En Progreso'),
         ('COMPLETADO', 'Completado'),
         ('ERROR', 'Error'),
+        ('PAUSADO', 'Pausado'),
     ]
     
     ejecucion = models.ForeignKey(EjecucionETL, on_delete=models.CASCADE, related_name='procesos_garantia')
     garantia = models.ForeignKey('Garantia', on_delete=models.CASCADE, related_name='procesos_etl')
-    etapa_actual = models.CharField(max_length=35, choices=ETAPAS, default='PENDIENTE')
-    fecha_inicio = models.DateTimeField(auto_now_add=True)
-    fecha_ultima_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    fecha_completado = models.DateTimeField(null=True, blank=True)
+    estado_general = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='PENDIENTE'
+    )
+    
+    class Meta:
+        ordering = ['-fecha_creacion']
+        verbose_name = "Proceso de Garantía"
+        verbose_name_plural = "Procesos de Garantía"
+    
+    def __str__(self):
+        return f"Garantía {self.garantia.placa}"
+    
+    @property
+    def etapa_actual(self):
+        """Retorna la etapa actual (primera pendiente o en progreso)"""
+        return self.etapas.filter(
+            estado__in=['PENDIENTE', 'EN_PROGRESO']
+        ).order_by('orden').first()
+    
+    @property
+    def siguiente_etapa(self):
+        """Retorna la siguiente etapa pendiente"""
+        return self.etapas.filter(estado='PENDIENTE').order_by('orden').first()
+    
+    def avanzar_a_siguiente_etapa(self):
+        """Avanza automáticamente a la siguiente etapa pendiente"""
+        etapa_actual = self.etapa_actual
+        if etapa_actual and etapa_actual.estado == 'COMPLETADO':
+            siguiente = self.siguiente_etapa
+            if siguiente:
+                siguiente.estado = 'EN_PROGRESO'
+                siguiente.save()
+                self.estado_general = 'EN_PROGRESO'
+                self.save()
+        return self.etapa_actual
+    
+    def marcar_como_completado(self):
+        """Marca el proceso como completado si todas las etapas están completadas"""
+        if self.etapas.filter(estado__in=['PENDIENTE', 'EN_PROGRESO', 'ERROR']).exists():
+            return False
+        self.estado_general = 'COMPLETADO'
+        self.fecha_completado = timezone.now()
+        self.save()
+        return True
+
+
+class EtapaProcesoGarantia(models.Model):
+    """
+    Representa una etapa individual del proceso de garantía.
+    Cada ProcesoGarantia tiene múltiples EtapaProcesoGarantia.
+    """
+    ESTADO_CHOICES = [
+        ('PENDIENTE', 'Pendiente'),
+        ('EN_PROGRESO', 'En Progreso'),
+        ('COMPLETADO', 'Completado'),
+        ('ERROR', 'Error'),
+        ('OMITIDA', 'Omitida'),
+    ]
+    
+    proceso = models.ForeignKey(
+        ProcesoGarantia, 
+        on_delete=models.CASCADE, 
+        related_name='etapas'
+    )
+    etapa = models.ForeignKey(
+        EtapaTipoGarantia, 
+        on_delete=models.CASCADE, 
+        related_name='procesos_etapas'
+    )
+    orden = models.IntegerField(help_text="Orden de ejecución de la etapa")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE')
+    fecha_inicio = models.DateTimeField(null=True, blank=True)
     fecha_completado = models.DateTimeField(null=True, blank=True)
     intentos = models.IntegerField(default=0)
     mensaje_error = models.TextField(null=True, blank=True)
-    datos_etapa = models.JSONField(null=True, blank=True)
+    datos_etapa = models.JSONField(null=True, blank=True, default=dict)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-fecha_inicio']
-        verbose_name = "Proceso de Garantía"
-        verbose_name_plural = "Procesos de Garantía"
-        indexes = [
-            models.Index(fields=['etapa_actual']),
-            models.Index(fields=['ejecucion', 'etapa_actual']),
-        ]
+        ordering = ['orden']
+        verbose_name = "Etapa de Proceso Garantía"
+        verbose_name_plural = "Etapas de Proceso Garantía"
+        unique_together = [['proceso', 'etapa']]
     
     def __str__(self):
-        return f"Garantía {self.garantia.placa} - {self.etapa_actual}"
+        return f"{self.proceso.garantia.placa} - {self.etapa.nombre} ({self.estado})"
+    
+    def iniciar(self):
+        """Marca la etapa como en progreso"""
+        self.estado = 'EN_PROGRESO'
+        self.fecha_inicio = timezone.now()
+        self.intentos += 1
+        self.save()
+    
+    def completar(self, datos_etapa=None):
+        """Marca la etapa como completada"""
+        self.estado = 'COMPLETADO'
+        self.fecha_completado = timezone.now()
+        if datos_etapa:
+            if not self.datos_etapa:
+                self.datos_etapa = {}
+            self.datos_etapa.update(datos_etapa)
+        self.save()
+        # Avanzar al siguiente si es necesario
+        self.proceso.avanzar_a_siguiente_etapa()
+        self.proceso.marcar_como_completado()
+    
+    def marcar_error(self, mensaje_error, datos_etapa=None):
+        """Marca la etapa como error"""
+        self.estado = 'ERROR'
+        self.mensaje_error = mensaje_error
+        self.intentos += 1
+        if datos_etapa:
+            if not self.datos_etapa:
+                self.datos_etapa = {}
+            self.datos_etapa.update(datos_etapa)
+        self.save()
+        self.proceso.estado_general = 'ERROR'
+        self.proceso.save()
 
 
 # ============================================================================
@@ -142,6 +414,7 @@ class Desembolso(models.Model):
     amortizacion_tramo_2 = models.CharField(max_length=10)
     dia_pago_cuota = models.IntegerField(null=True, blank=True)
     estado = models.CharField(max_length=50, null=True, blank=True)
+    tipo_desembolso = models.ForeignKey(TipoDesembolso, on_delete=models.CASCADE, related_name='desembolsos', null=True, blank=True)
 
     def __str__(self):
         return f"Desembolso {self.referencia}"

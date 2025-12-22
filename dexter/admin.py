@@ -1,5 +1,52 @@
 from django.contrib import admin
-from .models import Desembolso, CargoFijo, Garantia, EjecucionETL, ProcesoDesembolso, ProcesoGarantia
+from .models import (
+    Desembolso, 
+    CargoFijo, 
+    Garantia, 
+    EjecucionETL, 
+    ProcesoDesembolso, 
+    ProcesoGarantia,
+    EtapaProcesoDesembolso,
+    EtapaProcesoGarantia,
+    TipoDesembolso, 
+    EtapaTipoDesembolso,
+    TipoGarantia,
+    EtapaTipoGarantia,
+)
+
+@admin.register(TipoDesembolso)
+class TipoDesembolsoAdmin(admin.ModelAdmin):
+    """Administrador para el modelo TipoDesembolso"""
+    list_display = ['id', 'nombre', 'descripcion']
+    search_fields = ['nombre']
+    readonly_fields = ['id']
+
+
+
+@admin.register(EtapaTipoDesembolso)
+class EtapaTipoDesembolsoAdmin(admin.ModelAdmin):
+    """Administrador para el modelo EtapaTipoDesembolso"""
+    list_display = ['id', 'nombre', 'descripcion', 'tipo_desembolso', 'orden']
+    search_fields = ['nombre', 'tipo_desembolso__nombre']
+    readonly_fields = ['id']
+    list_filter = ['tipo_desembolso']
+
+
+@admin.register(TipoGarantia)
+class TipoGarantiaAdmin(admin.ModelAdmin):
+    """Administrador para el modelo TipoGarantia"""
+    list_display = ['id', 'nombre', 'descripcion']
+    search_fields = ['nombre']
+    readonly_fields = ['id']
+
+
+@admin.register(EtapaTipoGarantia)
+class EtapaTipoGarantiaAdmin(admin.ModelAdmin):
+    """Administrador para el modelo EtapaTipoGarantia"""
+    list_display = ['id', 'nombre', 'descripcion', 'tipo_garantia', 'orden']
+    search_fields = ['nombre', 'tipo_garantia__nombre']
+    readonly_fields = ['id']
+    list_filter = ['tipo_garantia']
 
 
 # ============================================================================
@@ -145,27 +192,58 @@ class EjecucionETLAdmin(admin.ModelAdmin):
     mostrar_progreso.short_description = 'Progreso'
 
 
+class EtapaProcesoDesembolsoInline(admin.TabularInline):
+    """Inline para mostrar etapas dentro del admin de ProcesoDesembolso"""
+    model = EtapaProcesoDesembolso
+    extra = 0
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion', 'fecha_inicio', 'fecha_completado']
+    fields = ['etapa', 'orden', 'estado', 'intentos', 'fecha_inicio', 'fecha_completado', 'mensaje_error']
+
+
 @admin.register(ProcesoDesembolso)
 class ProcesoDesembolsoAdmin(admin.ModelAdmin):
     """Administrador para ProcesoDesembolso"""
     list_display = [
-        'id', 'desembolso', 'ejecucion', 'etapa_actual', 
-        'intentos', 'fecha_ultima_actualizacion'
+        'id', 'desembolso', 'ejecucion', 'estado_general', 
+        'fecha_actualizacion', 'fecha_completado'
     ]
-    list_filter = ['etapa_actual', 'ejecucion']
+    list_filter = ['estado_general', 'ejecucion']
     search_fields = ['desembolso__referencia']
-    readonly_fields = ['fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado']
-    date_hierarchy = 'fecha_inicio'
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion', 'fecha_completado']
+    date_hierarchy = 'fecha_creacion'
+    inlines = [EtapaProcesoDesembolsoInline]
     
     fieldsets = (
         ('Información', {
-            'fields': ('ejecucion', 'desembolso', 'etapa_actual')
+            'fields': ('ejecucion', 'desembolso', 'estado_general')
+        }),
+        ('Fechas', {
+            'fields': ('fecha_creacion', 'fecha_actualizacion', 'fecha_completado')
+        }),
+    )
+
+
+@admin.register(EtapaProcesoDesembolso)
+class EtapaProcesoDesembolsoAdmin(admin.ModelAdmin):
+    """Administrador para EtapaProcesoDesembolso"""
+    list_display = [
+        'id', 'proceso', 'etapa', 'orden', 'estado', 
+        'intentos', 'fecha_inicio', 'fecha_completado'
+    ]
+    list_filter = ['estado', 'etapa']
+    search_fields = ['proceso__desembolso__referencia', 'etapa__nombre']
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
+    date_hierarchy = 'fecha_creacion'
+    
+    fieldsets = (
+        ('Información', {
+            'fields': ('proceso', 'etapa', 'orden', 'estado')
         }),
         ('Estado', {
             'fields': ('intentos', 'mensaje_error')
         }),
         ('Fechas', {
-            'fields': ('fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado')
+            'fields': ('fecha_creacion', 'fecha_actualizacion', 'fecha_inicio', 'fecha_completado')
         }),
         ('Datos de Etapa', {
             'fields': ('datos_etapa',),
@@ -174,27 +252,58 @@ class ProcesoDesembolsoAdmin(admin.ModelAdmin):
     )
 
 
+class EtapaProcesoGarantiaInline(admin.TabularInline):
+    """Inline para mostrar etapas dentro del admin de ProcesoGarantia"""
+    model = EtapaProcesoGarantia
+    extra = 0
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion', 'fecha_inicio', 'fecha_completado']
+    fields = ['etapa', 'orden', 'estado', 'intentos', 'fecha_inicio', 'fecha_completado', 'mensaje_error']
+
+
 @admin.register(ProcesoGarantia)
 class ProcesoGarantiaAdmin(admin.ModelAdmin):
     """Administrador para ProcesoGarantia"""
     list_display = [
-        'id', 'garantia', 'ejecucion', 'etapa_actual', 
-        'intentos', 'fecha_ultima_actualizacion'
+        'id', 'garantia', 'ejecucion', 'estado_general', 
+        'fecha_actualizacion', 'fecha_completado'
     ]
-    list_filter = ['etapa_actual', 'ejecucion']
+    list_filter = ['estado_general', 'ejecucion']
     search_fields = ['garantia__placa', 'garantia__referencia']
-    readonly_fields = ['fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado']
-    date_hierarchy = 'fecha_inicio'
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion', 'fecha_completado']
+    date_hierarchy = 'fecha_creacion'
+    inlines = [EtapaProcesoGarantiaInline]
     
     fieldsets = (
         ('Información', {
-            'fields': ('ejecucion', 'garantia', 'etapa_actual')
+            'fields': ('ejecucion', 'garantia', 'estado_general')
+        }),
+        ('Fechas', {
+            'fields': ('fecha_creacion', 'fecha_actualizacion', 'fecha_completado')
+        }),
+    )
+
+
+@admin.register(EtapaProcesoGarantia)
+class EtapaProcesoGarantiaAdmin(admin.ModelAdmin):
+    """Administrador para EtapaProcesoGarantia"""
+    list_display = [
+        'id', 'proceso', 'etapa', 'orden', 'estado', 
+        'intentos', 'fecha_inicio', 'fecha_completado'
+    ]
+    list_filter = ['estado', 'etapa']
+    search_fields = ['proceso__garantia__placa', 'etapa__nombre']
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
+    date_hierarchy = 'fecha_creacion'
+    
+    fieldsets = (
+        ('Información', {
+            'fields': ('proceso', 'etapa', 'orden', 'estado')
         }),
         ('Estado', {
             'fields': ('intentos', 'mensaje_error')
         }),
         ('Fechas', {
-            'fields': ('fecha_inicio', 'fecha_ultima_actualizacion', 'fecha_completado')
+            'fields': ('fecha_creacion', 'fecha_actualizacion', 'fecha_inicio', 'fecha_completado')
         }),
         ('Datos de Etapa', {
             'fields': ('datos_etapa',),
