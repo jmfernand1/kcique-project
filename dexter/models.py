@@ -416,6 +416,7 @@ class Desembolso(models.Model):
     estado = models.CharField(max_length=50, null=True, blank=True)
     tipo_desembolso = models.ForeignKey(TipoDesembolso, on_delete=models.CASCADE, related_name='desembolsos', null=True, blank=True)
     observaciones = models.JSONField(null=True, blank=True, default=dict)
+    ids_sharepoint = models.JSONField(null=True, blank=True, default=dict)
 
     def __str__(self):
         return f"Desembolso {self.referencia}"
