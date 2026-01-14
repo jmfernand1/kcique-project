@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-{% if es_creacion %}plus{% else %}edit{% endif %} mr-2"></i> {{ titulo }}</h1>
+        <a href="{% url 'dexter:desembolso_list' %}" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancelar
+        </a>
+    </div>
+
+    <form method="post" id="desembolso-form">
+        {% csrf_token %}
+        
+        <!-- Datos del Desembolso -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h4 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-money-bill-wave me-2"></i>Datos del Desembolso
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.referencia.id_for_label }}" class="form-label">Referencia *</label>
+                        {{ form.referencia }}
+                        {% if form.referencia.errors %}
+                            <div class="invalid-feedback d-block">{{ form.referencia.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.obligacion.id_for_label }}" class="form-label">Obligación *</label>
+                        {{ form.obligacion }}
+                        {% if form.obligacion.errors %}
+                            <div class="invalid-feedback d-block">{{ form.obligacion.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.tipo_desembolso.id_for_label }}" class="form-label">Tipo de Desembolso</label>
+                        {{ form.tipo_desembolso }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.id_cliente.id_for_label }}" class="form-label">ID Cliente *</label>
+                        {{ form.id_cliente }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.nit_beneficiario.id_for_label }}" class="form-label">NIT Beneficiario *</label>
+                        {{ form.nit_beneficiario }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.aliado.id_for_label }}" class="form-label">Aliado *</label>
+                        {{ form.aliado }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <h5 class="text-secondary mb-3"><i class="fas fa-university me-2"></i>Datos Bancarios</h5>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.tipo_cta_destino.id_for_label }}" class="form-label">Tipo Cuenta Destino *</label>
+                        {{ form.tipo_cta_destino }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.cod_tipo_cuenta_destino.id_for_label }}" class="form-label">Código Tipo Cuenta *</label>
+                        {{ form.cod_tipo_cuenta_destino }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.num_cta_destino.id_for_label }}" class="form-label">Número de Cuenta *</label>
+                        {{ form.num_cta_destino }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.banco_destino.id_for_label }}" class="form-label">Banco Destino *</label>
+                        {{ form.banco_destino }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.cod_banco_destino.id_for_label }}" class="form-label">Código Banco *</label>
+                        {{ form.cod_banco_destino }}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <h5 class="text-secondary mb-3"><i class="fas fa-dollar-sign me-2"></i>Condiciones Financieras</h5>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.valor_desembolso.id_for_label }}" class="form-label">Valor Desembolso *</label>
+                        {{ form.valor_desembolso }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.numero_tramos.id_for_label }}" class="form-label">Número de Tramos *</label>
+                        {{ form.numero_tramos }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.dia_pago_cuota.id_for_label }}" class="form-label">Día Pago Cuota</label>
+                        {{ form.dia_pago_cuota }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">
+                                <strong><i class="fas fa-layer-group me-2"></i>Tramo 1</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.plazo_tramo_1.id_for_label }}" class="form-label">Plazo *</label>
+                                        {{ form.plazo_tramo_1 }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.tipo_tasa_tramo_1.id_for_label }}" class="form-label">Tipo Tasa *</label>
+                                        {{ form.tipo_tasa_tramo_1 }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.tasa_tramo_1.id_for_label }}" class="form-label">Tasa (%) *</label>
+                                        {{ form.tasa_tramo_1 }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.amortizacion_tramo_1.id_for_label }}" class="form-label">Amortización *</label>
+                                        {{ form.amortizacion_tramo_1 }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">
+                                <strong><i class="fas fa-layer-group me-2"></i>Tramo 2</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.plazo_tramo_2.id_for_label }}" class="form-label">Plazo</label>
+                                        {{ form.plazo_tramo_2 }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.tipo_tasa_tramo_2.id_for_label }}" class="form-label">Tipo Tasa</label>
+                                        {{ form.tipo_tasa_tramo_2 }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.tasa_tramo_2.id_for_label }}" class="form-label">Tasa (%)</label>
+                                        {{ form.tasa_tramo_2 }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.amortizacion_tramo_2.id_for_label }}" class="form-label">Amortización</label>
+                                        {{ form.amortizacion_tramo_2 }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="{{ form.estado.id_for_label }}" class="form-label">Estado</label>
+                        {{ form.estado }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cargos Fijos -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h4 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-receipt me-2"></i>Cargos Fijos
+                </h4>
+                <button type="button" class="btn btn-success btn-sm" id="add-cargo">
+                    <i class="fas fa-plus"></i> Agregar Cargo Fijo
+                </button>
+            </div>
+            <div class="card-body">
+                {{ cargos_formset.management_form }}
+                
+                <div id="cargos-container">
+                    {% for cargo_form in cargos_formset %}
+                    <div class="cargo-form {% if forloop.last %}last-form{% endif %}" data-form-index="{{ forloop.counter0 }}">
+                        <div class="card mb-3 {% if cargo_form.instance.pk %}border-primary{% else %}border-secondary{% endif %}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="fas fa-receipt me-2"></i>
+                                    Cargo Fijo #<span class="cargo-number">{{ forloop.counter }}</span>
+                                </span>
+                                <button type="button" class="btn btn-danger btn-sm remove-cargo" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                {% if cargo_form.instance.pk %}
+                                    {{ cargo_form.id }}
+                                {% endif %}
+                                {{ cargo_form.DELETE }}
+                                
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Código</label>
+                                        {{ cargo_form.codigo }}
+                                    </div>
+                                    <div class="col-md-5 mb-3">
+                                        <label class="form-label">Nombre Cargo Fijo</label>
+                                        {{ cargo_form.nombre_cargo_fijo }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Valor</label>
+                                        {{ cargo_form.valor }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Fecha Efectiva</label>
+                                        {{ cargo_form.fecha_efectiva }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Fecha Revisión</label>
+                                        {{ cargo_form.fecha_revision }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Periodicidad</label>
+                                        {{ cargo_form.periodicidad }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="text-muted text-center py-3" id="no-cargos-message" style="{% if cargos_formset.forms %}display: none;{% endif %}">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay cargos fijos. Haz clic en "Agregar Cargo Fijo" para añadir uno.
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="d-flex justify-content-end gap-2 mb-4">
+            <a href="{% url 'dexter:desembolso_list' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> {% if es_creacion %}Crear Desembolso{% else %}Guardar Cambios{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Template para nuevo cargo fijo -->
+<template id="cargo-template">
+    <div class="cargo-form" data-form-index="__prefix__">
+        <div class="card mb-3 border-secondary">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-receipt me-2"></i>
+                    Cargo Fijo #<span class="cargo-number">__number__</span>
+                </span>
+                <button type="button" class="btn btn-danger btn-sm remove-cargo" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Código</label>
+                        <input type="text" name="cargos_fijos-__prefix__-codigo" class="form-control" placeholder="Ej: CF001">
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label">Nombre Cargo Fijo</label>
+                        <input type="text" name="cargos_fijos-__prefix__-nombre_cargo_fijo" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Valor</label>
+                        <input type="number" name="cargos_fijos-__prefix__-valor" class="form-control" step="0.01">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Fecha Efectiva</label>
+                        <input type="date" name="cargos_fijos-__prefix__-fecha_efectiva" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Fecha Revisión</label>
+                        <input type="date" name="cargos_fijos-__prefix__-fecha_revision" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Periodicidad</label>
+                        <input type="text" name="cargos_fijos-__prefix__-periodicidad" class="form-control" placeholder="MENSUAL/ANUAL">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('cargos-container');
+    const addButton = document.getElementById('add-cargo');
+    const template = document.getElementById('cargo-template');
+    const totalForms = document.getElementById('id_cargos_fijos-TOTAL_FORMS');
+    const noCargoMessage = document.getElementById('no-cargos-message');
+    
+    function updateFormIndices() {
+        const forms = container.querySelectorAll('.cargo-form');
+        forms.forEach((form, index) => {
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.name) {
+                    input.name = input.name.replace(/cargos_fijos-\d+-/, `cargos_fijos-${index}-`);
+                }
+                if (input.id) {
+                    input.id = input.id.replace(/cargos_fijos-\d+-/, `cargos_fijos-${index}-`);
+                }
+            });
+            form.querySelector('.cargo-number').textContent = index + 1;
+            form.dataset.formIndex = index;
+        });
+        
+        // Update total forms count
+        const visibleForms = container.querySelectorAll('.cargo-form:not([style*="display: none"])').length;
+        totalForms.value = container.querySelectorAll('.cargo-form').length;
+        
+        // Show/hide no cargo message
+        if (visibleForms === 0 || (visibleForms === 1 && container.querySelector('.cargo-form input[name$="-codigo"]').value === '')) {
+            noCargoMessage.style.display = 'block';
+        } else {
+            noCargoMessage.style.display = 'none';
+        }
+    }
+    
+    // Add new cargo form
+    addButton.addEventListener('click', function() {
+        const formCount = container.querySelectorAll('.cargo-form').length;
+        const newForm = template.content.cloneNode(true);
+        const formHtml = newForm.querySelector('.cargo-form');
+        
+        // Replace __prefix__ with actual index
+        formHtml.innerHTML = formHtml.innerHTML.replace(/__prefix__/g, formCount);
+        formHtml.querySelector('.cargo-number').textContent = formCount + 1;
+        formHtml.dataset.formIndex = formCount;
+        
+        container.appendChild(formHtml);
+        totalForms.value = formCount + 1;
+        
+        // Add remove listener
+        formHtml.querySelector('.remove-cargo').addEventListener('click', function() {
+            removeCargoForm(formHtml);
+        });
+        
+        noCargoMessage.style.display = 'none';
+    });
+    
+    // Remove cargo form
+    function removeCargoForm(formElement) {
+        const deleteInput = formElement.querySelector('input[name$="-DELETE"]');
+        if (deleteInput) {
+            // Existing form - mark for deletion
+            deleteInput.checked = true;
+            formElement.style.display = 'none';
+        } else {
+            // New form - just remove
+            formElement.remove();
+        }
+        updateFormIndices();
+    }
+    
+    // Add remove listeners to existing forms
+    container.querySelectorAll('.remove-cargo').forEach(button => {
+        button.addEventListener('click', function() {
+            removeCargoForm(this.closest('.cargo-form'));
+        });
+    });
+    
+    // Hide DELETE checkboxes
+    container.querySelectorAll('input[name$="-DELETE"]').forEach(input => {
+        input.style.display = 'none';
+        const label = input.nextElementSibling;
+        if (label && label.tagName === 'LABEL') {
+            label.style.display = 'none';
+        }
+    });
+    
+    // Initial check for no cargo message
+    updateFormIndices();
+});
+</script>
+{% endblock %}
+

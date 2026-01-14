@@ -38,8 +38,11 @@
                             <i class="fas fa-robot"></i> Dexter
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dexterDropdown">
-                            <li><a class="dropdown-item" href="{% url 'dexter:dashboard_dexter' %}">Dashboard ETL</a></li>
-                            <li><a class="dropdown-item" href="{% url 'dexter:ejecucion_list' %}">Ver Ejecuciones</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dexter:dashboard_dexter' %}"><i class="fas fa-chart-line me-2"></i>Dashboard ETL</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dexter:ejecucion_list' %}"><i class="fas fa-history me-2"></i>Ver Ejecuciones</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'dexter:desembolso_list' %}"><i class="fas fa-money-bill-wave me-2"></i>Desembolsos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dexter:garantia_list' %}"><i class="fas fa-shield-alt me-2"></i>Garantías</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

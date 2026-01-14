@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Desembolso {{ desembolso.referencia }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-money-bill-wave mr-2"></i> Desembolso: {{ desembolso.referencia }}</h1>
+        <div>
+            <a href="{% url 'dexter:desembolso_list' %}" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a href="{% url 'dexter:desembolso_update' desembolso.pk %}" class="btn btn-warning me-2">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'dexter:desembolso_delete' desembolso.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Eliminar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información General -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>Información General
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Referencia:</th>
+                                    <td><strong>{{ desembolso.referencia }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Obligación:</th>
+                                    <td>{{ desembolso.obligacion }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">ID Cliente:</th>
+                                    <td>{{ desembolso.id_cliente }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">NIT Beneficiario:</th>
+                                    <td>{{ desembolso.nit_beneficiario }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Aliado:</th>
+                                    <td>{{ desembolso.aliado }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 45%;">Tipo Desembolso:</th>
+                                    <td>{{ desembolso.tipo_desembolso|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Estado:</th>
+                                    <td>
+                                        {% if desembolso.estado %}
+                                            <span class="badge bg-{% if desembolso.estado == 'COMPLETADO' %}success{% elif desembolso.estado == 'EN_PROGRESO' %}info{% elif desembolso.estado == 'ERROR' %}danger{% elif desembolso.estado == 'PENDIENTE' %}warning{% else %}secondary{% endif %}">
+                                                {{ desembolso.estado }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">Sin estado</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Valor Desembolso:</th>
+                                    <td class="h5 text-success">${{ desembolso.valor_desembolso|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Día Pago Cuota:</th>
+                                    <td>{{ desembolso.dia_pago_cuota|default:"-" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos Bancarios -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-university me-2"></i>Datos Bancarios
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 45%;">Banco Destino:</th>
+                                    <td>{{ desembolso.banco_destino }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Código Banco:</th>
+                                    <td>{{ desembolso.cod_banco_destino }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 45%;">Tipo Cuenta:</th>
+                                    <td>{{ desembolso.tipo_cta_destino }} ({{ desembolso.cod_tipo_cuenta_destino }})</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Número Cuenta:</th>
+                                    <td>{{ desembolso.num_cta_destino }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tramos -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-layer-group me-2"></i>Condiciones por Tramos
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <strong>Tramo 1</strong>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr>
+                                            <th class="text-muted">Plazo:</th>
+                                            <td>{{ desembolso.plazo_tramo_1 }} meses</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Tipo Tasa:</th>
+                                            <td>{{ desembolso.tipo_tasa_tramo_1 }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Tasa:</th>
+                                            <td>{{ desembolso.tasa_tramo_1 }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Amortización:</th>
+                                            <td>{{ desembolso.amortizacion_tramo_1 }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% if desembolso.numero_tramos > 1 %}
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <strong>Tramo 2</strong>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm table-borderless mb-0">
+                                        <tr>
+                                            <th class="text-muted">Plazo:</th>
+                                            <td>{{ desembolso.plazo_tramo_2 }} meses</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Tipo Tasa:</th>
+                                            <td>{{ desembolso.tipo_tasa_tramo_2 }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Tasa:</th>
+                                            <td>{{ desembolso.tasa_tramo_2 }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Amortización:</th>
+                                            <td>{{ desembolso.amortizacion_tramo_2 }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-lg-4">
+            <!-- Resumen -->
+            <div class="card shadow mb-4 border-left-primary">
+                <div class="card-header py-3">
+                    <h5 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie me-2"></i>Resumen
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="display-6 text-success">${{ desembolso.valor_desembolso|floatformat:0 }}</span>
+                        <p class="text-muted mb-0">Valor del Desembolso</p>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Número de Tramos:</span>
+                        <span class="badge bg-primary">{{ desembolso.numero_tramos }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span class="text-muted">Cargos Fijos:</span>
+                        <span class="badge bg-dark">{{ cargos_fijos.count }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cargos Fijos -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-receipt me-2"></i>Cargos Fijos
+                    </h5>
+                    <span class="badge bg-dark">{{ cargos_fijos.count }}</span>
+                </div>
+                <div class="card-body">
+                    {% if cargos_fijos %}
+                        {% for cargo in cargos_fijos %}
+                        <div class="card mb-2 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ cargo.nombre_cargo_fijo }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            <span class="badge bg-secondary">{{ cargo.codigo }}</span>
+                                            {% if cargo.periodicidad %}| {{ cargo.periodicidad }}{% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if cargo.valor %}
+                                            <span class="text-success">${{ cargo.valor|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if cargo.fecha_efectiva or cargo.fecha_revision %}
+                                <div class="mt-1">
+                                    <small class="text-muted">
+                                        {% if cargo.fecha_efectiva %}Efectiva: {{ cargo.fecha_efectiva|date:"d/m/Y" }}{% endif %}
+                                        {% if cargo.fecha_revision %} | Revisión: {{ cargo.fecha_revision|date:"d/m/Y" }}{% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mb-0">
+                            <i class="fas fa-info-circle me-2"></i>No hay cargos fijos registrados.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

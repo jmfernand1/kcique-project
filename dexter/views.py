@@ -1,12 +1,15 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField, Q
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib import messages
+from django.db import transaction
 from .models import (
     Desembolso, CargoFijo, Garantia, EjecucionETL, 
     ProcesoDesembolso, ProcesoGarantia
 )
+from .forms import DesembolsoForm, CargoFijoFormSet, GarantiaForm
 
 # ============================================================================
 # VISTAS HTML PARA FRONTEND
@@ -162,3 +165,235 @@ class EjecucionETLDetailView(DetailView):
         context['progreso_porcentaje'] = progreso_porcentaje
         
         return context
+
+
+# ============================================================================
+# VISTAS CRUD PARA DESEMBOLSOS
+# ============================================================================
+
+class DesembolsoListView(ListView):
+    """Lista de desembolsos con filtros y búsqueda"""
+    model = Desembolso
+    template_name = 'dexter/desembolso_list.html'
+    context_object_name = 'desembolsos'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-id')
+        
+        # Filtro por búsqueda
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(referencia__icontains=query) |
+                Q(aliado__icontains=query) |
+                Q(estado__icontains=query) |
+                Q(obligacion__icontains=query)
+            )
+        
+        # Filtro por estado
+        estado = self.request.GET.get('estado')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        context['estado_filter'] = self.request.GET.get('estado', '')
+        # Obtener estados únicos para el filtro
+        context['estados_disponibles'] = Desembolso.objects.values_list('estado', flat=True).distinct().exclude(estado__isnull=True)
+        return context
+
+
+class DesembolsoDetailView(DetailView):
+    """Vista detallada de un desembolso con sus cargos fijos"""
+    model = Desembolso
+    template_name = 'dexter/desembolso_detail.html'
+    context_object_name = 'desembolso'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cargos_fijos'] = self.object.cargos_fijos.all()
+        return context
+
+
+class DesembolsoCreateView(CreateView):
+    """Vista para crear un nuevo desembolso con cargos fijos"""
+    model = Desembolso
+    form_class = DesembolsoForm
+    template_name = 'dexter/desembolso_form.html'
+    success_url = reverse_lazy('dexter:desembolso_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Crear Nuevo Desembolso'
+        context['es_creacion'] = True
+        if self.request.POST:
+            context['cargos_formset'] = CargoFijoFormSet(self.request.POST)
+        else:
+            context['cargos_formset'] = CargoFijoFormSet()
+        return context
+    
+    def form_valid(self, form):
+        context = self.get_context_data()
+        cargos_formset = context['cargos_formset']
+        
+        with transaction.atomic():
+            self.object = form.save()
+            
+            if cargos_formset.is_valid():
+                cargos_formset.instance = self.object
+                cargos_formset.save()
+            else:
+                return self.form_invalid(form)
+        
+        messages.success(self.request, f'Desembolso {self.object.referencia} creado exitosamente.')
+        return redirect(self.success_url)
+
+
+class DesembolsoUpdateView(UpdateView):
+    """Vista para editar un desembolso existente"""
+    model = Desembolso
+    form_class = DesembolsoForm
+    template_name = 'dexter/desembolso_form.html'
+    success_url = reverse_lazy('dexter:desembolso_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = f'Editar Desembolso: {self.object.referencia}'
+        context['es_creacion'] = False
+        if self.request.POST:
+            context['cargos_formset'] = CargoFijoFormSet(self.request.POST, instance=self.object)
+        else:
+            context['cargos_formset'] = CargoFijoFormSet(instance=self.object)
+        return context
+    
+    def form_valid(self, form):
+        context = self.get_context_data()
+        cargos_formset = context['cargos_formset']
+        
+        with transaction.atomic():
+            self.object = form.save()
+            
+            if cargos_formset.is_valid():
+                cargos_formset.instance = self.object
+                cargos_formset.save()
+            else:
+                return self.form_invalid(form)
+        
+        messages.success(self.request, f'Desembolso {self.object.referencia} actualizado exitosamente.')
+        return redirect(self.success_url)
+
+
+class DesembolsoDeleteView(DeleteView):
+    """Vista para eliminar un desembolso"""
+    model = Desembolso
+    template_name = 'dexter/desembolso_confirm_delete.html'
+    success_url = reverse_lazy('dexter:desembolso_list')
+    context_object_name = 'desembolso'
+    
+    def delete(self, request, *args, **kwargs):
+        desembolso = self.get_object()
+        messages.success(request, f'Desembolso {desembolso.referencia} eliminado exitosamente.')
+        return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# VISTAS CRUD PARA GARANTÍAS
+# ============================================================================
+
+class GarantiaListView(ListView):
+    """Lista de garantías con filtros y búsqueda"""
+    model = Garantia
+    template_name = 'dexter/garantia_list.html'
+    context_object_name = 'garantias'
+    paginate_by = 20
+    
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-id')
+        
+        # Filtro por búsqueda
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(placa__icontains=query) |
+                Q(referencia__icontains=query) |
+                Q(estado__icontains=query) |
+                Q(chasis__icontains=query) |
+                Q(motor__icontains=query)
+            )
+        
+        # Filtro por estado
+        estado = self.request.GET.get('estado')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        context['estado_filter'] = self.request.GET.get('estado', '')
+        # Obtener estados únicos para el filtro
+        context['estados_disponibles'] = Garantia.objects.values_list('estado', flat=True).distinct().exclude(estado__isnull=True)
+        return context
+
+
+class GarantiaDetailView(DetailView):
+    """Vista detallada de una garantía"""
+    model = Garantia
+    template_name = 'dexter/garantia_detail.html'
+    context_object_name = 'garantia'
+
+
+class GarantiaCreateView(CreateView):
+    """Vista para crear una nueva garantía"""
+    model = Garantia
+    form_class = GarantiaForm
+    template_name = 'dexter/garantia_form.html'
+    success_url = reverse_lazy('dexter:garantia_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Crear Nueva Garantía'
+        context['es_creacion'] = True
+        return context
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.success(self.request, f'Garantía {self.object.placa} creada exitosamente.')
+        return redirect(self.success_url)
+
+
+class GarantiaUpdateView(UpdateView):
+    """Vista para editar una garantía existente"""
+    model = Garantia
+    form_class = GarantiaForm
+    template_name = 'dexter/garantia_form.html'
+    success_url = reverse_lazy('dexter:garantia_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = f'Editar Garantía: {self.object.placa}'
+        context['es_creacion'] = False
+        return context
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.success(self.request, f'Garantía {self.object.placa} actualizada exitosamente.')
+        return redirect(self.success_url)
+
+
+class GarantiaDeleteView(DeleteView):
+    """Vista para eliminar una garantía"""
+    model = Garantia
+    template_name = 'dexter/garantia_confirm_delete.html'
+    success_url = reverse_lazy('dexter:garantia_list')
+    context_object_name = 'garantia'
+    
+    def delete(self, request, *args, **kwargs):
+        garantia = self.get_object()
+        messages.success(request, f'Garantía {garantia.placa} eliminada exitosamente.')
+        return super().delete(request, *args, **kwargs)

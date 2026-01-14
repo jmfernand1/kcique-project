@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Garantía{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-trash mr-2"></i> Eliminar Garantía</h1>
+    </div>
+
+    <div class="card shadow mb-4 border-danger">
+        <div class="card-header py-3 bg-danger text-white">
+            <h4 class="m-0 font-weight-bold">
+                <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+            </div>
+
+            <p class="lead">¿Estás seguro de que deseas eliminar la siguiente garantía?</p>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Placa:</th>
+                                    <td><strong>{{ garantia.placa }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Referencia:</th>
+                                    <td>{{ garantia.referencia|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Obligación:</th>
+                                    <td>{{ garantia.obligacion }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Cliente:</th>
+                                    <td>{{ garantia.id_cliente }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Modelo:</th>
+                                    <td>{{ garantia.modelo|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Valor:</th>
+                                    <td>
+                                        {% if garantia.valor_vehiculo %}
+                                            <span class="text-success">${{ garantia.valor_vehiculo|floatformat:0 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'dexter:garantia_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sí, Eliminar Garantía
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

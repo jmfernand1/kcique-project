@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Desembolso{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-trash mr-2"></i> Eliminar Desembolso</h1>
+    </div>
+
+    <div class="card shadow mb-4 border-danger">
+        <div class="card-header py-3 bg-danger text-white">
+            <h4 class="m-0 font-weight-bold">
+                <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+            </div>
+
+            <p class="lead">¿Estás seguro de que deseas eliminar el siguiente desembolso?</p>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Referencia:</th>
+                                    <td><strong>{{ desembolso.referencia }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Obligación:</th>
+                                    <td>{{ desembolso.obligacion }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Cliente:</th>
+                                    <td>{{ desembolso.id_cliente }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Aliado:</th>
+                                    <td>{{ desembolso.aliado }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Valor:</th>
+                                    <td class="text-success">${{ desembolso.valor_desembolso|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Cargos Fijos:</th>
+                                    <td><span class="badge bg-dark">{{ desembolso.cargos_fijos.count }}</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if desembolso.cargos_fijos.count > 0 %}
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                Este desembolso tiene <strong>{{ desembolso.cargos_fijos.count }}</strong> cargo(s) fijo(s) asociado(s) que también serán eliminados.
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'dexter:desembolso_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sí, Eliminar Desembolso
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

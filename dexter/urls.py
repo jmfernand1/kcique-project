@@ -41,6 +41,20 @@ urlpatterns = [
     path('', views.dashboard_dexter, name='dashboard_dexter'),
     path('ejecuciones/', views.EjecucionETLListView.as_view(), name='ejecucion_list'),
     path('ejecuciones/<int:pk>/', views.EjecucionETLDetailView.as_view(), name='ejecucion_detail'),
+    
+    # URLs para Desembolsos
+    path('desembolsos/', views.DesembolsoListView.as_view(), name='desembolso_list'),
+    path('desembolsos/crear/', views.DesembolsoCreateView.as_view(), name='desembolso_create'),
+    path('desembolsos/<int:pk>/', views.DesembolsoDetailView.as_view(), name='desembolso_detail'),
+    path('desembolsos/<int:pk>/editar/', views.DesembolsoUpdateView.as_view(), name='desembolso_update'),
+    path('desembolsos/<int:pk>/eliminar/', views.DesembolsoDeleteView.as_view(), name='desembolso_delete'),
+    
+    # URLs para Garantías
+    path('garantias/', views.GarantiaListView.as_view(), name='garantia_list'),
+    path('garantias/crear/', views.GarantiaCreateView.as_view(), name='garantia_create'),
+    path('garantias/<int:pk>/', views.GarantiaDetailView.as_view(), name='garantia_detail'),
+    path('garantias/<int:pk>/editar/', views.GarantiaUpdateView.as_view(), name='garantia_update'),
+    path('garantias/<int:pk>/eliminar/', views.GarantiaDeleteView.as_view(), name='garantia_delete'),
 ]
 
 # Añadir las URLs de la API

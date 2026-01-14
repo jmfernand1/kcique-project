@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Garantía {{ garantia.placa }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-shield-alt mr-2"></i> Garantía: {{ garantia.placa }}</h1>
+        <div>
+            <a href="{% url 'dexter:garantia_list' %}" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a href="{% url 'dexter:garantia_update' garantia.pk %}" class="btn btn-warning me-2">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <a href="{% url 'dexter:garantia_delete' garantia.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Eliminar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información General -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>Información General
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Placa:</th>
+                                    <td><strong class="h5">{{ garantia.placa }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Referencia:</th>
+                                    <td>{{ garantia.referencia|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Obligación:</th>
+                                    <td>{{ garantia.obligacion }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">ID Cliente:</th>
+                                    <td>{{ garantia.id_cliente }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">ID Garante:</th>
+                                    <td>{{ garantia.id_garante }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 45%;">Estado:</th>
+                                    <td>
+                                        {% if garantia.estado %}
+                                            <span class="badge bg-{% if garantia.estado == 'COMPLETADO' %}success{% elif garantia.estado == 'EN_PROGRESO' %}info{% elif garantia.estado == 'ERROR' %}danger{% elif garantia.estado == 'PENDIENTE' %}warning{% else %}secondary{% endif %}">
+                                                {{ garantia.estado }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">Sin estado</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Fecha Desembolso:</th>
+                                    <td>{{ garantia.fecha_desembolso|date:"d/m/Y"|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Fecha Prenda:</th>
+                                    <td>{{ garantia.fecha_prenda|date:"d/m/Y"|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Folio Electrónico:</th>
+                                    <td>{{ garantia.folio_electronico|default:"-" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos del Vehículo -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-car me-2"></i>Datos del Vehículo
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Placa:</th>
+                                    <td><strong>{{ garantia.placa }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Modelo (Año):</th>
+                                    <td>{{ garantia.modelo|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Color:</th>
+                                    <td>{{ garantia.color|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Servicio:</th>
+                                    <td>{{ garantia.servicio|default:"-" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 40%;">Chasis:</th>
+                                    <td><code>{{ garantia.chasis|default:"-" }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Motor:</th>
+                                    <td><code>{{ garantia.motor|default:"-" }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Serie:</th>
+                                    <td><code>{{ garantia.serie|default:"-" }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Valor Vehículo:</th>
+                                    <td class="h5 text-success">
+                                        {% if garantia.valor_vehiculo %}
+                                            ${{ garantia.valor_vehiculo|floatformat:0 }}
+                                        {% else %}
+                                            <span class="text-muted h6">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <th class="text-muted" style="width: 50%;">Código Fasecolda:</th>
+                                    <td>{{ garantia.cod_fasecolda }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <th class="text-muted" style="width: 50%;">Código Fasecolda (alt):</th>
+                                    <td>{{ garantia.codigo_fasecolda }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos del Seguro -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h4 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-contract me-2"></i>Datos del Seguro
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 45%;">Póliza Vehículo:</th>
+                                    <td>{{ garantia.poliza_vehiculo|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Número Póliza:</th>
+                                    <td>{{ garantia.nro_poliza|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Código Aseguradora:</th>
+                                    <td>{{ garantia.cod_aseguradora|default:"-" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th class="text-muted" style="width: 50%;">Valor Asegurado:</th>
+                                    <td>
+                                        {% if garantia.valor_asegurado %}
+                                            ${{ garantia.valor_asegurado|floatformat:2 }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Vencimiento Seguro:</th>
+                                    <td>
+                                        {% if garantia.fecha_vencimiento_seguro %}
+                                            {{ garantia.fecha_vencimiento_seguro|date:"d/m/Y" }}
+                                            {% now "Y-m-d" as today %}
+                                            {% if garantia.fecha_vencimiento_seguro|date:"Y-m-d" < today %}
+                                                <span class="badge bg-danger ms-2">Vencido</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Tipo Prima:</th>
+                                    <td>{{ garantia.tipo_prima|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">Valor Prima:</th>
+                                    <td>
+                                        {% if garantia.valor_prima %}
+                                            ${{ garantia.valor_prima|floatformat:2 }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-lg-4">
+            <!-- Resumen del Vehículo -->
+            <div class="card shadow mb-4 border-left-primary">
+                <div class="card-header py-3 bg-dark text-white">
+                    <h5 class="m-0 font-weight-bold">
+                        <i class="fas fa-car me-2"></i>{{ garantia.placa }}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-car fa-5x text-secondary mb-3"></i>
+                    </div>
+                    {% if garantia.modelo %}
+                        <p class="h4 mb-1">Modelo {{ garantia.modelo }}</p>
+                    {% endif %}
+                    {% if garantia.color %}
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-palette me-1"></i>{{ garantia.color }}
+                        </p>
+                    {% endif %}
+                    {% if garantia.valor_vehiculo %}
+                        <hr>
+                        <p class="h3 text-success mb-0">${{ garantia.valor_vehiculo|floatformat:0 }}</p>
+                        <small class="text-muted">Valor del Vehículo</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Estado del Seguro -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h5 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-shield me-2"></i>Estado del Seguro
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if garantia.nro_poliza %}
+                        <div class="text-center mb-3">
+                            <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                            <p class="mb-0"><strong>Póliza Activa</strong></p>
+                            <small class="text-muted">{{ garantia.nro_poliza }}</small>
+                        </div>
+                        {% if garantia.fecha_vencimiento_seguro %}
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Vencimiento:</span>
+                                <span>{{ garantia.fecha_vencimiento_seguro|date:"d/m/Y" }}</span>
+                            </div>
+                        {% endif %}
+                        {% if garantia.valor_asegurado %}
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="text-muted">Valor Asegurado:</span>
+                                <span class="text-success">${{ garantia.valor_asegurado|floatformat:0 }}</span>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-2"></i>
+                            <p class="text-muted mb-0">Sin información de seguro</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
