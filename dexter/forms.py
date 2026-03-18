@@ -53,8 +53,8 @@ class CargoFijoForm(forms.ModelForm):
         widgets = {
             'codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: CF001'}),
             'nombre_cargo_fijo': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_efectiva': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'fecha_revision': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_efectiva': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_revision': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'form-control', 'type': 'date'}),
             'periodicidad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'MENSUAL/ANUAL'}),
             'valor': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
         }
