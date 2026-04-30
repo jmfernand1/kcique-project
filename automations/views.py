@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib import messages
 from .models import AutomatedProcess, ProcessLog, ScheduledTask
 from .forms import AutomatedProcessForm, ScheduledTaskForm
-from .process_executor import run_process_threaded # Importamos la función
+from .process_executor import run_process_threaded, is_process_running
 from django_q.tasks import schedule
 from django_q.models import Schedule
 from django_q.status import Stat
@@ -94,9 +94,20 @@ def run_process_view(request, process_id):
     if not process.is_active:
         messages.error(request, f"El proceso '{process.name}' no está activo y no puede ser ejecutado.")
         return redirect('automations:process_detail', pk=process_id)
-    
-    run_process_threaded(process_id) # Llamamos a la función del executor
-    messages.info(request, f"Ejecución del proceso '{process.name}' iniciada en segundo plano.")
+
+    if is_process_running(process_id):
+        messages.warning(
+            request,
+            f"El proceso '{process.name}' ya está en ejecución. Se ignoró el disparo manual."
+        )
+    else:
+        # Encolamos la ejecución en Django Q para que viaje por la cola y respete
+        # el lock atómico a nivel de base de datos.
+        run_process_threaded(process_id)
+        messages.info(
+            request,
+            f"Ejecución del proceso '{process.name}' encolada en Django Q."
+        )
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse_lazy('automations:process_detail', kwargs={'pk': process_id})))
 
 def get_log_output(request, log_id):

@@ -13,6 +13,14 @@ class AutomatedProcess(models.Model):
     last_run_time = models.DateTimeField(blank=True, null=True)
     last_run_status = models.CharField(max_length=50, blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    is_running = models.BooleanField(
+        default=False,
+        help_text="Lock a nivel de base de datos. Indica si el proceso se está ejecutando actualmente. Compartido entre todos los workers de Django Q."
+    )
+    running_started_at = models.DateTimeField(
+        blank=True, null=True,
+        help_text="Marca de tiempo en que se adquirió el lock de ejecución. Se usa para detectar locks rancios (stale)."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

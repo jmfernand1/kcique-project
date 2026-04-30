@@ -1,209 +1,254 @@
 import subprocess
-import threading
 import os
-import shlex
+from datetime import timedelta
+
+from django.db import transaction
 from django.utils import timezone
+
 from .models import AutomatedProcess, ProcessLog
 
-# Semáforo para limitar el número máximo de procesos concurrentes
-MAX_CONCURRENT_PROCESSES = 4
-process_semaphore = threading.Semaphore(MAX_CONCURRENT_PROCESSES)
+# Tiempo (en minutos) tras el cual se considera que un lock quedó "rancio"
+# (por ejemplo si el worker que adquirió el lock fue terminado abruptamente).
+# Si el lock supera este tiempo, se libera y se permite una nueva ejecución.
+STALE_LOCK_AFTER_MINUTES = 180
 
-# Conjunto thread-safe para rastrear procesos en ejecución
-running_processes = set()
-running_processes_lock = threading.Lock()
 
 def is_process_running(process_id):
     """
-    Verifica si un proceso está actualmente en ejecución.
+    Verifica (a nivel de base de datos) si un proceso está actualmente en ejecución.
+    Esta consulta es válida para todos los workers de Django Q porque consulta la BD,
+    no una estructura en memoria local del proceso.
     """
-    with running_processes_lock:
-        return process_id in running_processes
+    try:
+        return AutomatedProcess.objects.filter(id=process_id, is_running=True).exists()
+    except Exception:
+        return False
 
-def mark_process_as_running(process_id):
-    """
-    Marca un proceso como en ejecución.
-    Retorna True si se pudo marcar, False si ya estaba en ejecución.
-    """
-    with running_processes_lock:
-        if process_id in running_processes:
-            return False
-        running_processes.add(process_id)
-        return True
 
-def mark_process_as_finished(process_id):
+def acquire_run_lock(process_id):
     """
-    Marca un proceso como finalizado, liberándolo para futuras ejecuciones.
+    Intenta adquirir el lock de ejecución de un proceso de forma ATÓMICA usando
+    select_for_update. Esto garantiza que dos workers (procesos) o threads que
+    compitan por el mismo proceso no puedan ambos pasar el chequeo.
+
+    Retorna una tupla (acquired: bool, message: str).
     """
-    with running_processes_lock:
-        running_processes.discard(process_id)
+    try:
+        with transaction.atomic():
+            try:
+                process = AutomatedProcess.objects.select_for_update().get(id=process_id)
+            except AutomatedProcess.DoesNotExist:
+                return False, f"Proceso con ID {process_id} no existe."
+
+            if process.is_running:
+                # Si el lock está marcado como running pero pasó demasiado tiempo,
+                # se considera rancio (probablemente el worker murió sin liberar).
+                stale_threshold = timezone.now() - timedelta(minutes=STALE_LOCK_AFTER_MINUTES)
+                if process.running_started_at and process.running_started_at < stale_threshold:
+                    print(
+                        f"[{timezone.now()}] Lock rancio detectado para '{process.name}' "
+                        f"(adquirido el {process.running_started_at}). Se libera y se reintenta."
+                    )
+                else:
+                    return False, (
+                        f"El proceso '{process.name}' ya está en ejecución "
+                        f"(desde {process.running_started_at})."
+                    )
+
+            process.is_running = True
+            process.running_started_at = timezone.now()
+            process.save(update_fields=['is_running', 'running_started_at'])
+            return True, f"Lock adquirido para '{process.name}'."
+    except Exception as e:
+        return False, f"Error al adquirir lock para proceso {process_id}: {e}"
+
+
+def release_run_lock(process_id):
+    """
+    Libera el lock de ejecución de un proceso. Idempotente.
+    """
+    try:
+        AutomatedProcess.objects.filter(id=process_id).update(
+            is_running=False,
+            running_started_at=None,
+        )
+    except Exception as e:
+        print(f"Error al liberar lock para proceso {process_id}: {e}")
+
+
+def _build_command_and_env(process_instance):
+    """
+    Construye el comando y el entorno para ejecutar el script asociado al proceso.
+    Retorna (command_list, env_dict, error_message_or_None).
+    """
+    script_path = process_instance.script_path
+    python_executable = 'python'
+
+    if process_instance.virtual_env_path:
+        python_executable = os.path.join(process_instance.virtual_env_path, 'bin', 'python')
+        if not os.path.exists(python_executable):
+            python_executable_win = os.path.join(
+                process_instance.virtual_env_path, 'Scripts', 'python.exe'
+            )
+            if os.path.exists(python_executable_win):
+                python_executable = python_executable_win
+            else:
+                return None, None, (
+                    f"Python ejecutable no encontrado en el venv: "
+                    f"{process_instance.virtual_env_path}"
+                )
+
+    command = [python_executable, script_path]
+
+    env = os.environ.copy()
+    if process_instance.virtual_env_path:
+        if os.name == 'nt':
+            venv_bin_path = os.path.join(process_instance.virtual_env_path, 'Scripts')
+        else:
+            venv_bin_path = os.path.join(process_instance.virtual_env_path, 'bin')
+
+        current_path = env.get('PATH', '')
+        if venv_bin_path not in current_path:
+            env['PATH'] = f"{venv_bin_path}{os.pathsep}{current_path}"
+        env['VIRTUAL_ENV'] = process_instance.virtual_env_path
+
+    return command, env, None
+
 
 def execute_script(process_id):
     """
-    Ejecuta el script asociado a un AutomatedProcess y registra su log.
-    Esta función está diseñada para ser ejecutada en un hilo separado.
+    Ejecuta el script asociado a un AutomatedProcess de forma SINCRÓNICA y registra su log.
+
+    IMPORTANTE: esta función debe ejecutarse de forma síncrona dentro del worker que
+    la invoca (un worker de Django Q o un thread del servidor web). No lanza un thread
+    extra; así el worker queda ocupado durante toda la duración del script y Django Q
+    no entrega ejecuciones duplicadas mientras el script corre.
+
+    El lock a nivel de BD ya se adquirió antes de llamar a esta función (en
+    run_process_safely). Aquí solo nos aseguramos de liberarlo en el `finally`.
     """
+    log_entry = None
+    final_status = 'FAILED'
+    output = []
+    error_output = []
+
     try:
-        process_instance = AutomatedProcess.objects.get(id=process_id)
-    except AutomatedProcess.DoesNotExist:
-        print(f"Error: Proceso con id {process_id} no encontrado.")
-        mark_process_as_finished(process_id)
-        return
+        try:
+            process_instance = AutomatedProcess.objects.get(id=process_id)
+        except AutomatedProcess.DoesNotExist:
+            print(f"Error: Proceso con id {process_id} no encontrado.")
+            return
 
-    log_entry = ProcessLog.objects.create(
-        process=process_instance,
-        status='STARTED'
-    )
+        log_entry = ProcessLog.objects.create(
+            process=process_instance,
+            status='RUNNING',
+        )
 
-    print(f"Intentando adquirir semáforo para el proceso: {process_instance.name}")
-    
-    try:
-        with process_semaphore:
-            print(f"Semáforo adquirido para el proceso: {process_instance.name}")
-            log_entry.status = 'RUNNING'
-            log_entry.save()
+        process_instance.last_run_time = timezone.now()
+        process_instance.save(update_fields=['last_run_time'])
 
-            process_instance.last_run_time = timezone.now()
-            process_instance.save()
+        command, env, build_error = _build_command_and_env(process_instance)
+        if build_error:
+            print(build_error)
+            output.append(build_error)
+            process_instance.last_run_status = 'Failed'
+            process_instance.save(update_fields=['last_run_status'])
+            return
 
-            output = []
-            error_output = []
-            final_status = 'FAILED' # Asumir fallo hasta que se complete con éxito
+        print(f"[{timezone.now()}] Ejecutando comando: {' '.join(command)}")
 
-            try:
-                # Construir el comando
-                script_path = process_instance.script_path
-                python_executable = 'python' # O 'python3' dependiendo del sistema/entorno
+        try:
+            proc = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                env=env,
+            )
 
-                # Si hay un entorno virtual especificado, activarlo
-                if process_instance.virtual_env_path:
-                    # Esto es una simplificación. Activar un venv para un subproceso puede ser complejo.
-                    # Una forma común es llamar directamente al python del venv.
-                    python_executable = os.path.join(process_instance.virtual_env_path, 'bin', 'python')
-                    if not os.path.exists(python_executable):
-                        # Intenta con Scripts para Windows
-                        python_executable_win = os.path.join(process_instance.virtual_env_path, 'Scripts', 'python.exe')
-                        if os.path.exists(python_executable_win):
-                            python_executable = python_executable_win
-                        else:
-                            error_message = f"Python ejecutable no encontrado en el venv: {process_instance.virtual_env_path}"
-                            print(error_message)
-                            output.append(error_message)
-                            log_entry.status = 'FAILED'
-                            log_entry.output_log = "\n".join(output)
-                            log_entry.end_time = timezone.now()
-                            log_entry.save()
-                            process_instance.last_run_status = 'Failed'
-                            process_instance.save()
-                            return
+            for line in iter(proc.stdout.readline, ''):
+                print(line, end='')
+                output.append(line.rstrip())
 
+            for line in iter(proc.stderr.readline, ''):
+                print(f"Error: {line}", end='')
+                error_output.append(line.rstrip())
 
-                command = [python_executable, script_path]
-                
-                # Añadir argumentos si es necesario (esto requeriría modificar el modelo)
-                # command.extend(process_instance.arguments.split()) 
+            proc.stdout.close()
+            proc.stderr.close()
+            proc.wait()
 
-                print(f"Ejecutando comando: {' '.join(command)}")
-                # Usar shlex.split si el comando es una cadena compleja, pero aquí es una lista.
-                
-                # Entorno del subproceso
-                env = os.environ.copy()
-                if process_instance.virtual_env_path:
-                     # Modificar el PATH para que incluya el bin del venv
-                     # Esto es más robusto que solo llamar al python del venv para algunos scripts
-                    venv_bin_path = os.path.join(process_instance.virtual_env_path, 'bin')
-                    if os.name == 'nt': # Windows
-                        venv_bin_path = os.path.join(process_instance.virtual_env_path, 'Scripts')
-                    
-                    current_path = env.get('PATH', '')
-                    if venv_bin_path not in current_path:
-                        env['PATH'] = f"{venv_bin_path}{os.pathsep}{current_path}"
-                    # Para algunos venvs, también es útil VIRTUAL_ENV
-                    env['VIRTUAL_ENV'] = process_instance.virtual_env_path
-
-
-                process = subprocess.Popen(
-                    command,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    env=env
-                )
-
-                # Captura de output en tiempo real (simplificado)
-                # Para un log en tiempo real más robusto en la UI, se necesitaría WebSockets o polling.
-                for line in iter(process.stdout.readline, ''):
-                    print(line, end='')
-                    output.append(line.strip())
-                    # Podríamos guardar parcialmente el log aquí si es muy largo o se quiere ver "en vivo"
-                    # log_entry.output_log = "\n".join(output)
-                    # log_entry.save()
-                
-                for line in iter(process.stderr.readline, ''):
-                    print(f"Error: {line}", end='')
-                    error_output.append(line.strip())
-                
-                process.stdout.close()
-                process.stderr.close()
-                process.wait()
-
-                if process.returncode == 0:
-                    final_status = 'SUCCESS'
-                    process_instance.last_run_status = 'Success'
-                else:
-                    final_status = 'FAILED'
-                    process_instance.last_run_status = f'Failed (Code: {process.returncode})'
-                    output.append(f"--- ERRORES ({process.returncode}) ---")
-                    output.extend(error_output)
-
-
-            except Exception as e:
-                print(f"Excepción durante la ejecución del script {process_instance.name}: {e}")
-                output.append(f"Error interno del sistema al ejecutar el script: {str(e)}")
+            if proc.returncode == 0:
+                final_status = 'SUCCESS'
+                process_instance.last_run_status = 'Success'
+            else:
                 final_status = 'FAILED'
-                process_instance.last_run_status = 'Failed (Exception)'
-            
-            finally:
+                process_instance.last_run_status = f'Failed (Code: {proc.returncode})'
+                output.append(f"--- ERRORES ({proc.returncode}) ---")
+                output.extend(error_output)
+
+        except Exception as e:
+            print(f"Excepción durante la ejecución del script {process_instance.name}: {e}")
+            output.append(f"Error interno del sistema al ejecutar el script: {str(e)}")
+            final_status = 'FAILED'
+            process_instance.last_run_status = 'Failed (Exception)'
+
+        finally:
+            if log_entry is not None:
                 log_entry.output_log = "\n".join(output)
                 log_entry.status = final_status
                 log_entry.end_time = timezone.now()
                 log_entry.save()
-                process_instance.save()
-                print(f"Proceso {process_instance.name} finalizado con estado: {final_status}. Semáforo liberado.")
-    
+            try:
+                process_instance.save(update_fields=['last_run_status'])
+            except Exception:
+                pass
+            print(
+                f"[{timezone.now()}] Proceso {process_instance.name} "
+                f"finalizado con estado: {final_status}."
+            )
+
     finally:
-        # Siempre liberar el proceso del registro, incluso si hay excepciones
-        mark_process_as_finished(process_id)
+        # Siempre liberar el lock, incluso ante excepciones inesperadas.
+        release_run_lock(process_id)
+
+
+def run_process_safely(process_id):
+    """
+    Adquiere el lock a nivel de BD y ejecuta el script de forma sincrónica.
+
+    Este es el ÚNICO punto de entrada que debe usarse para correr un proceso, tanto
+    desde una tarea programada de Django Q como desde una ejecución manual disparada
+    vía async_task. Si el proceso ya está corriendo (en cualquier worker), se cancela
+    la ejecución duplicada.
+    """
+    acquired, msg = acquire_run_lock(process_id)
+    if not acquired:
+        print(f"[{timezone.now()}] Ejecución cancelada: {msg}")
+        return msg
+
+    print(f"[{timezone.now()}] {msg} Iniciando ejecución sincrónica.")
+    execute_script(process_id)
+    return f"Proceso {process_id} ejecutado."
+
 
 def run_process_threaded(process_id):
     """
-    Inicia la ejecución de un proceso en un nuevo hilo.
-    Verifica primero si el proceso ya está en ejecución.
-    """
-    # Verificar si el proceso ya está ejecutándose
-    if not mark_process_as_running(process_id):
-        msg = f"El proceso {process_id} ya está en ejecución. Ejecución duplicada cancelada."
-        print(msg)
-        return msg
-    
-    thread = threading.Thread(target=execute_script, args=(process_id,))
-    thread.start()
-    print(f"Proceso {process_id} enviado a ejecución en un hilo.")
-    return f"Proceso {process_id} iniciado correctamente."
-    # No se une al hilo aquí para permitir que la solicitud principal (ej. HTTP) termine rápido.
-    # El hilo continuará en segundo plano.
+    Compatibilidad hacia atrás. Antes lanzaba un thread; ahora delega a Django Q
+    vía async_task para que la ejecución viaje por la cola y respete el lock de BD.
 
-# Ejemplo de cómo se podría llamar (esto iría en una vista o un comando de gestión)
-# if __name__ == '__main__':
-#     # Esto es solo para prueba y no se ejecutará directamente así en Django.
-#     # Configurar Django primero si se prueba fuera del manage.py
-#     # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kcique_project.settings')
-#     # import django
-#     # django.setup()
-#     
-#     # Crear un proceso de prueba si no existe (requiere acceso a DB y modelos)
-#     # test_process, created = AutomatedProcess.objects.get_or_create(
-#     # name='Test Script', 
-#     # script_path='path/to/your/test_script.py' # CAMBIAR ESTO
-#     # )
-#     # run_process_threaded(test_process.id) 
+    Si Django Q no está disponible por algún motivo, cae a la ejecución sincrónica
+    (con lock) en el proceso actual.
+    """
+    try:
+        from django_q.tasks import async_task
+        async_task('automations.process_executor.run_process_safely', process_id)
+        msg = f"Proceso {process_id} encolado en Django Q."
+        print(f"[{timezone.now()}] {msg}")
+        return msg
+    except Exception as e:
+        print(
+            f"[{timezone.now()}] No se pudo encolar en Django Q ({e}). "
+            f"Se ejecutará sincrónicamente en este proceso."
+        )
+        return run_process_safely(process_id)

@@ -145,11 +145,18 @@ REST_FRAMEWORK = {
 }
 
 # Configuración para django-q
+# IMPORTANTE: como las tareas (RPA / scraping) ahora se ejecutan de forma SINCRÓNICA
+# dentro del worker (sin lanzar threads internos), el `timeout` debe ser mayor que la
+# duración del script más largo. Si un script puede tardar más, súbelo. `retry` debe
+# ser estrictamente mayor que `timeout` para que Django Q no encole un reintento
+# mientras el script todavía está corriendo en otro worker.
 Q_CLUSTER = {
     "name": "kcique_project",
     "workers": 4,
     "recycle": 500,
-    "timeout": 60,
+    "timeout": 1800,   # 30 minutos por tarea (antes 60s, lo que provocaba reencolados).
+    "retry": 1860,     # debe ser > timeout para evitar duplicados por reintento.
+    "max_attempts": 1, # No reintentar tareas fallidas: evita reejecutar RPAs que ya corrieron.
     "compress": True,
     "save_limit": 250,
     "queue_limit": 500,

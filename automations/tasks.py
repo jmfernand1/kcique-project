@@ -1,68 +1,79 @@
-from .process_executor import run_process_threaded, is_process_running
-from .models import AutomatedProcess, ScheduledTask
 from django.utils import timezone
-from datetime import time
+
+from .models import AutomatedProcess, ScheduledTask
+from .process_executor import run_process_safely, is_process_running
+
 
 def execute_automated_process(*args, **kwargs):
     """
-    Tarea de Django-Q que busca un AutomatedProcess por su ID
-    y lo ejecuta usando el process_executor.
-    Acepta kwargs para ser compatible con la forma en que django-q invoca las tareas.
-    Verifica el rango de horas si está configurado.
-    Verifica que el proceso no esté ya en ejecución.
+    Tarea de Django-Q que busca un AutomatedProcess por su ID y lo ejecuta de forma
+    SINCRÓNICA dentro del worker. Acepta kwargs para ser compatible con la forma en
+    que django-q invoca las tareas.
+
+    - Verifica el rango de horas (hora_inicio/hora_fin) si está configurado.
+    - El chequeo de "ya está en ejecución" final se hace dentro de run_process_safely
+      con un select_for_update atómico, válido entre todos los workers.
+    - Como la ejecución es sincrónica, el worker permanece ocupado durante todo el
+      tiempo que dura el script. Esto evita que Django Q vuelva a entregar la misma
+      tarea al mismo worker mientras corre.
     """
     task_id = kwargs.get('task_id')
     if task_id is None:
-        # Intenta obtener el ID del primer argumento posicional si no está en kwargs
         if args:
             task_id = args[0]
         else:
-            error_msg = f"Error: No se pudo ejecutar la tarea programada. No se proporcionó 'task_id'."
+            error_msg = "Error: No se pudo ejecutar la tarea programada. No se proporcionó 'task_id'."
             print(error_msg)
             return error_msg
-            
+
     try:
         process = AutomatedProcess.objects.get(id=task_id)
-        
-        # Verificar si el proceso ya está en ejecución
-        if is_process_running(task_id):
-            skip_msg = f"[{timezone.now()}] Omitiendo ejecución de '{process.name}' - el proceso ya está en ejecución."
-            print(skip_msg)
-            return skip_msg
-        
-        # Verificar si hay restricciones de horario para tareas de tipo MINUTOS o HORAS
-        # Obtener la hora actual en la zona horaria local configurada
-        current_time = timezone.localtime(timezone.now()).time()
-        
-        # Buscar tareas programadas que apliquen restricciones de horario
-        scheduled_tasks = ScheduledTask.objects.filter(
-            process=process,
-            activo=True,
-            frecuencia__in=['MINUTOS', 'HORAS']
-        )
-        
-        # Verificar si alguna tarea tiene restricciones de horario
-        for task in scheduled_tasks:
-            if task.hora_inicio and task.hora_fin:
-                # Verificar si la hora actual está dentro del rango permitido
-                if not (task.hora_inicio <= current_time <= task.hora_fin):
-                    skip_msg = f"[{timezone.now()}] Omitiendo ejecución de '{process.name}' - fuera del horario permitido ({task.hora_inicio} - {task.hora_fin}). Hora actual: {current_time.strftime('%H:%M')}"
-                    print(skip_msg)
-                    return skip_msg
-        
-        print(f"[{timezone.now()}] Iniciando tarea programada para el proceso: '{process.name}' (ID: {task_id})")
-        
-        # Usamos la función que ya maneja hilos y logging
-        result = run_process_threaded(task_id)
-        
-        print(f"[{timezone.now()}] Tarea programada para '{process.name}' enviada a ejecución.")
-        return result
-        
     except AutomatedProcess.DoesNotExist:
-        error_msg = f"Error: No se pudo ejecutar la tarea programada. Proceso con ID {task_id} no encontrado."
+        error_msg = f"Error: Proceso con ID {task_id} no encontrado."
         print(error_msg)
         return error_msg
     except Exception as e:
-        error_msg = f"Error inesperado al ejecutar la tarea programada para el proceso ID {task_id}: {e}"
+        error_msg = f"Error inesperado al consultar el proceso ID {task_id}: {e}"
         print(error_msg)
-        return error_msg 
+        return error_msg
+
+    if not process.is_active:
+        skip_msg = f"[{timezone.now()}] Omitiendo '{process.name}' - el proceso está inactivo."
+        print(skip_msg)
+        return skip_msg
+
+    # Pre-chequeo barato (no atómico). Evita trabajo si ya sabemos que está corriendo.
+    # El chequeo definitivo es atómico dentro de run_process_safely.
+    if is_process_running(task_id):
+        skip_msg = (
+            f"[{timezone.now()}] Omitiendo ejecución de '{process.name}' - "
+            f"el proceso ya está en ejecución."
+        )
+        print(skip_msg)
+        return skip_msg
+
+    # Verificar restricciones de horario (solo aplica a frecuencias MINUTOS / HORAS).
+    current_time = timezone.localtime(timezone.now()).time()
+    scheduled_tasks = ScheduledTask.objects.filter(
+        process=process,
+        activo=True,
+        frecuencia__in=['MINUTOS', 'HORAS'],
+    )
+    for tarea in scheduled_tasks:
+        if tarea.hora_inicio and tarea.hora_fin:
+            if not (tarea.hora_inicio <= current_time <= tarea.hora_fin):
+                skip_msg = (
+                    f"[{timezone.now()}] Omitiendo ejecución de '{process.name}' - "
+                    f"fuera del horario permitido ({tarea.hora_inicio} - {tarea.hora_fin}). "
+                    f"Hora actual: {current_time.strftime('%H:%M')}"
+                )
+                print(skip_msg)
+                return skip_msg
+
+    print(
+        f"[{timezone.now()}] Iniciando tarea programada para el proceso: "
+        f"'{process.name}' (ID: {task_id})"
+    )
+
+    # Ejecución sincrónica con lock atómico a nivel de BD.
+    return run_process_safely(task_id)
