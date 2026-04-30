@@ -99,7 +99,7 @@ def procesar_y_cargar_csv(archivo_csv_subido, nombre_script='carga_web_adagio'):
 
 def dashboard_adagio(request):
     # Estadísticas
-    casos_pendientes = CasoDebito.objects.filter(estado='PENDIENTE').count()
+    casos_pendientes = CasoDebito.objects.filter(estado='PENDIENTE DATOS OK').count()
     casos_grabado = CasoDebito.objects.filter(estado='GRABADO').count()
     casos_pendiente_bizagi = CasoDebito.objects.filter(estado='PENDIENTE BIZAGI').count()
     casos_finalizado = CasoDebito.objects.filter(estado='FINALIZADO').count()

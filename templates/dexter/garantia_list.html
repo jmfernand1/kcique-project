@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Lista de Garantías{% endblock %}
 
@@ -92,7 +93,7 @@
                                 <td>{{ garantia.modelo|default:"-" }}</td>
                                 <td class="text-end">
                                     {% if garantia.valor_vehiculo %}
-                                        ${{ garantia.valor_vehiculo|floatformat:0 }}
+                                        ${{ garantia.valor_vehiculo|floatformat:0 | intcomma }}
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}

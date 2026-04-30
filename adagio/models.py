@@ -23,6 +23,7 @@ class CasoDebito(models.Model):
     
     ESTADO_CHOICES = (
         ("PENDIENTE", "PENDIENTE"),
+        ("PENDIENTE DATOS OK", "PENDIENTE DATOS OK"),
         ("GRABADO", "GRABADO"),
         ("PENDIENTE BIZAGI", "PENDIENTE BIZAGI"),
         ("FINALIZADO", "FINALIZADO"),

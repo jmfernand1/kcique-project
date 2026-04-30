@@ -399,9 +399,9 @@ class Desembolso(models.Model):
     aliado = models.CharField(max_length=255)
     tipo_cta_destino = models.CharField(max_length=50)
     cod_tipo_cuenta_destino = models.IntegerField()
-    num_cta_destino = models.BigIntegerField()
-    banco_destino = models.CharField(max_length=100)
-    cod_banco_destino = models.IntegerField()
+    num_cta_destino = models.BigIntegerField(null=True, blank=True)
+    banco_destino = models.CharField(max_length=100, null=True, blank=True)
+    cod_banco_destino = models.IntegerField(null=True, blank=True)
     valor_desembolso = models.FloatField()
     numero_tramos = models.IntegerField()
     plazo_tramo_1 = models.IntegerField()
@@ -417,6 +417,10 @@ class Desembolso(models.Model):
     tipo_desembolso = models.ForeignKey(TipoDesembolso, on_delete=models.CASCADE, related_name='desembolsos', null=True, blank=True)
     observaciones = models.JSONField(null=True, blank=True, default=dict)
     ids_sharepoint = models.JSONField(null=True, blank=True, default=dict)
+    etapa_desembolso = models.IntegerField(default=0)
+    intentos_desembolso = models.IntegerField(default=0)
+    create_at = models.DateField(auto_created=True, null=True, blank=True)
+    update_at = models.DateField(auto_now=True, blank=True, null=True)
 
     def __str__(self):
         return f"Desembolso {self.referencia}"
@@ -436,7 +440,7 @@ class CargoFijo(models.Model):
     
 
 class Garantia(models.Model):
-    referencia = models.CharField(max_length=100, null=True, blank=True)
+    referencia = models.CharField(max_length=100, unique=True)
     obligacion = models.BigIntegerField()
     id_cliente = models.BigIntegerField()
     id_garante = models.BigIntegerField()

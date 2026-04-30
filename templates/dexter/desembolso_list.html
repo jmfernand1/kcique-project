@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Lista de Desembolsos{% endblock %}
 
@@ -90,7 +91,7 @@
                                 <td>{{ desembolso.id_cliente }}</td>
                                 <td>{{ desembolso.aliado }}</td>
                                 <td class="text-end">
-                                    ${{ desembolso.valor_desembolso|floatformat:2 }}
+                                    ${{ desembolso.valor_desembolso|floatformat:2 | intcomma }}
                                 </td>
                                 <td>
                                     {% if desembolso.estado %}

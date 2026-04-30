@@ -56,10 +56,10 @@ class DesembolsoViewSet(viewsets.ModelViewSet):
     """
     queryset = Desembolso.objects.all().prefetch_related('cargos_fijos')
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['referencia', 'obligacion', 'id_cliente', 'nit_beneficiario', 'aliado']
+    filterset_fields = ['referencia', 'obligacion', 'id_cliente', 'nit_beneficiario', 'aliado','estado']
     search_fields = ['referencia', 'aliado', 'banco_destino']
     ordering_fields = ['id', 'referencia', 'valor_desembolso']
-    ordering = ['-id']
+    ordering = ['id']
     
     def get_serializer_class(self):
         """Usa diferentes serializers para lectura y escritura"""
@@ -114,11 +114,11 @@ class GarantiaViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = [
         'referencia', 'obligacion', 'id_cliente', 'id_garante', 
-        'placa', 'cod_fasecolda', 'cod_aseguradora'
+        'placa', 'cod_fasecolda', 'cod_aseguradora','estado'
     ]
     search_fields = ['referencia', 'placa', 'chasis', 'motor', 'nro_poliza']
     ordering_fields = ['id', 'placa', 'fecha_desembolso', 'valor_vehiculo']
-    ordering = ['-id']
+    ordering = ['id']
 
 
 # ============================================================================

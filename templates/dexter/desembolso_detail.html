@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Desembolso {{ desembolso.referencia }}{% endblock %}
 
@@ -268,6 +269,26 @@
                     {% endif %}
                 </div>
             </div>
+            <!-- Cargos Fijos -->
+             <div class="card shadow mb-4 border-left-primary">
+                <div class="card-header py-3">
+                    <h5 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-project-diagram me-2"></i>Etapa flujo
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="display-6 text-dark">{{ desembolso.etapa_desembolso|floatformat:0 }}</span>
+
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Número de intentos:</span>
+                        <span class="badge bg-primary">{{ desembolso.intentos_desembolso }}</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

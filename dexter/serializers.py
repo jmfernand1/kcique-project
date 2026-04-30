@@ -14,13 +14,58 @@ from .models import (
     EtapaTipoGarantia
     )
 
-
+import datetime
 # ============================================================================
 # SERIALIZERS DE DATOS PRINCIPALES
 # ============================================================================
 
+class YyyyMmDdDateField(serializers.Field):
+    """
+    API <-> Modelo:
+    - to_internal_value: convierte 20260131 / "20260131" / "2026-01-31" a date
+    - to_representation: convierte date -> 20260131 (int)
+    """
+    def to_internal_value(self, data):
+        if data in (None, "", 0):
+            return None
+
+        # Normalizamos a string para parseo
+        if isinstance(data, int):
+            s = str(data)
+        elif isinstance(data, str):
+            s = data.strip()
+            # Soportar "YYYY-MM-DD"
+            if "-" in s:
+                try:
+                    return datetime.datetime.strptime(s, "%Y-%m-%d").date()
+                except ValueError:
+                    raise serializers.ValidationError("Fecha inválida. Use YYYYMMDD o YYYY-MM-DD.")
+        else:
+            raise serializers.ValidationError("Tipo inválido. Use entero YYYYMMDD o string.")
+
+        # Validar "YYYYMMDD"
+        if len(s) != 8 or not s.isdigit():
+            raise serializers.ValidationError("Formato inválido. Use YYYYMMDD (8 dígitos).")
+
+        try:
+            return datetime.datetime.strptime(s, "%Y%m%d").date()
+        except ValueError:
+            raise serializers.ValidationError("Fecha inexistente (revise día/mes).")
+
+    def to_representation(self, value):
+        if value in (None, ""):
+            return None
+        if isinstance(value, datetime.datetime):
+            value = value.date()
+        return int(value.strftime("%Y%m%d"))
+
+
 class CargoFijoSerializer(serializers.ModelSerializer):
     """Serializer para el modelo CargoFijo"""
+    
+    fecha_efectiva = YyyyMmDdDateField(required=False, allow_null=True)
+    fecha_revision = YyyyMmDdDateField(required=False, allow_null=True)
+
     class Meta:
         model = CargoFijo
         fields = '__all__'
@@ -44,6 +89,10 @@ class DesembolsoWriteSerializer(serializers.ModelSerializer):
 
 class GarantiaSerializer(serializers.ModelSerializer):
     """Serializer para el modelo Garantia"""
+    fecha_desembolso = YyyyMmDdDateField(required=False, allow_null=True)
+    fecha_prenda = YyyyMmDdDateField(required=False, allow_null=True)   
+    fecha_vencimiento_seguro = YyyyMmDdDateField(required=False, allow_null=True)
+    
     class Meta:
         model = Garantia
         fields = '__all__'

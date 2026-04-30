@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Garantía {{ garantia.placa }}{% endblock %}
 
@@ -260,7 +261,7 @@
                     {% endif %}
                     {% if garantia.valor_vehiculo %}
                         <hr>
-                        <p class="h3 text-success mb-0">${{ garantia.valor_vehiculo|floatformat:0 }}</p>
+                        <p class="h3 text-success mb-0">${{ garantia.valor_vehiculo|floatformat:0 | intcomma}}</p>
                         <small class="text-muted">Valor del Vehículo</small>
                     {% endif %}
                 </div>
