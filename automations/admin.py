@@ -3,8 +3,8 @@ from .models import AutomatedProcess, ProcessLog, ScheduledTask
 
 @admin.register(AutomatedProcess)
 class AutomatedProcessAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_active', 'last_run_time', 'last_run_status', 'script_path')
-    list_filter = ('is_active', 'last_run_status')
+    list_display = ('name', 'is_active', 'is_running', 'last_run_time', 'last_run_status', 'script_path')
+    list_filter = ('is_active', 'is_running', 'last_run_status')
     search_fields = ('name', 'description', 'script_path')
     readonly_fields = ('last_run_time', 'last_run_status', 'created_at', 'updated_at')
     fieldsets = (
@@ -12,7 +12,13 @@ class AutomatedProcessAdmin(admin.ModelAdmin):
             'fields': ('name', 'description', 'is_active')
         }),
         ('Configuración Técnica', {
-            'fields': ('script_path', 'virtual_env_path')
+            'fields': ('script_path', 'virtual_env_path', 'max_runtime_minutes')
+        }),
+        ('Control de Ejecución', {
+            'description': 'Estado del bloqueo que impide ejecuciones simultáneas. '
+                           'Si un proceso quedó colgado, desmarque "is running" y '
+                           'limpie "running since" para liberarlo manualmente.',
+            'fields': ('is_running', 'running_since')
         }),
         ('Estado y Trazabilidad', {
             'classes': ('collapse',),

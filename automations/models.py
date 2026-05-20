@@ -16,6 +16,24 @@ class AutomatedProcess(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # --- Control de ejecución (lock a nivel de base de datos) ---
+    # Estos campos evitan que un proceso se ejecute de forma simultánea cuando
+    # el programador vuelve a dispararlo antes de que la ejecución anterior haya
+    # terminado. Se almacenan en BD para que el lock funcione tambien ENTRE
+    # procesos distintos del sistema operativo (workers de django-q + web).
+    is_running = models.BooleanField(
+        default=False, blank=True,
+        help_text="Indica si el proceso se está ejecutando actualmente. Actúa como lock para impedir ejecuciones simultáneas."
+    )
+    running_since = models.DateTimeField(
+        blank=True, null=True,
+        help_text="Fecha/hora en que comenzó la ejecución en curso. Se usa para detectar y liberar locks obsoletos."
+    )
+    max_runtime_minutes = models.PositiveIntegerField(
+        blank=True, null=True,
+        help_text="Duración máxima estimada (minutos). Si el lock lleva activo más de este tiempo se considera obsoleto y se libera automáticamente. Si se deja vacío se usa el valor por defecto del sistema."
+    )
+
     def __str__(self):
         return self.name
 

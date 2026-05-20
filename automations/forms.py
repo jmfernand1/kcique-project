@@ -9,6 +9,7 @@ class AutomatedProcessForm(forms.ModelForm):
             'description',
             'script_path',
             'virtual_env_path',
+            'max_runtime_minutes',
             'is_active',
         ]
         widgets = {
@@ -16,6 +17,7 @@ class AutomatedProcessForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción detallada del proceso'}),
             'script_path': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '/ruta/al/script.py'}),
             'virtual_env_path': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '/ruta/al/entorno_virtual (opcional)'}),
+            'max_runtime_minutes': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ej. 180', 'min': 1}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
@@ -23,11 +25,13 @@ class AutomatedProcessForm(forms.ModelForm):
             'description': 'Descripción',
             'script_path': 'Ruta del Script Python',
             'virtual_env_path': 'Ruta del Entorno Virtual (Opcional)',
+            'max_runtime_minutes': 'Duración máxima estimada (minutos)',
             'is_active': '¿Está activo?'
         }
         help_texts = {
             'script_path': 'La ruta absoluta al script de Python que se ejecutará.',
             'virtual_env_path': 'Si el script requiere un entorno virtual específico, indica la ruta a la carpeta raíz del venv.',
+            'max_runtime_minutes': 'Si una ejecución supera este tiempo, el sistema asume que el proceso quedó colgado y libera el bloqueo para permitir nuevas ejecuciones. Déjelo vacío para usar el valor por defecto del sistema.',
         }
 
     def clean_script_path(self):

@@ -158,6 +158,7 @@ Al acceder al sistema, encontrará:
    - **Descripción**: Explicación detallada del propósito
    - **Ruta del Script**: Ruta absoluta al archivo Python
    - **Entorno Virtual**: (Opcional) Ruta al venv específico
+   - **Duración máxima estimada (minutos)**: (Opcional) Tiempo máximo que se espera que tarde una ejecución. Si una ejecución lo supera, el sistema asume que el proceso quedó colgado y libera su bloqueo. Si se deja vacío, se usa el valor por defecto del sistema (180 minutos).
    - **Activo**: Marcar para habilitar ejecución
 
 4. **Ejemplo de configuración**:
@@ -393,6 +394,25 @@ python manage.py qmonitor
 2. **Confirme permisos** de ejecución del archivo
 3. **Valide el entorno virtual** si está especificado
 4. **Revise los logs** en el detalle del proceso
+
+#### Una tarea quedó bloqueada y no vuelve a ejecutarse
+
+Para evitar que un proceso se ejecute de forma simultánea (lo que rompe scripts
+que abren programas que solo admiten una instancia), cada `AutomatedProcess`
+tiene un **bloqueo a nivel de base de datos**. Si el programador vuelve a
+disparar una tarea que aún no ha terminado, la ejecución duplicada se omite
+automáticamente.
+
+Si un proceso quedó colgado (por ejemplo, el worker murió sin liberar el
+bloqueo), tiene dos opciones:
+
+1. **Esperar la liberación automática**: el bloqueo se libera solo cuando supera
+   la *Duración máxima estimada* del proceso (o 180 minutos por defecto).
+2. **Liberarlo manualmente** desde el panel de administración:
+   - Vaya a **Admin → Automated processes** y abra el proceso.
+   - En la sección **Control de Ejecución**, desmarque `is running` y borre el
+     valor de `running since`.
+   - Guarde. El proceso podrá volver a ejecutarse.
 
 ### Logs del Sistema
 
