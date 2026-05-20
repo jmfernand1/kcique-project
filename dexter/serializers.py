@@ -15,10 +15,14 @@ from .models import (
     )
 
 import datetime
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
+
 # ============================================================================
 # SERIALIZERS DE DATOS PRINCIPALES
 # ============================================================================
 
+@extend_schema_field(OpenApiTypes.INT)
 class YyyyMmDdDateField(serializers.Field):
     """
     API <-> Modelo:

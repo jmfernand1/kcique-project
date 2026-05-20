@@ -1,0 +1,5367 @@
+openapi: 3.0.3
+info:
+  title: API Dexter - KCIQUE
+  version: 1.0.0
+  description: 'API REST de la app Dexter: ETL de Desembolsos y Garantías, y tracking
+    de procesos/etapas. Permite a un desarrollador externo consumir o entregar información
+    a la integración.'
+paths:
+  /dexter/api/cargos-fijos/:
+    get:
+      operationId: cargos_fijos_list
+      description: |-
+        ViewSet para gestionar Cargos Fijos.
+
+        Endpoints disponibles:
+        - GET /api/cargos-fijos/ - Listar todos los cargos fijos
+        - POST /api/cargos-fijos/ - Crear un nuevo cargo fijo
+        - GET /api/cargos-fijos/{id}/ - Obtener un cargo fijo específico
+        - PUT /api/cargos-fijos/{id}/ - Actualizar un cargo fijo completo
+        - PATCH /api/cargos-fijos/{id}/ - Actualizar parcialmente un cargo fijo
+        - DELETE /api/cargos-fijos/{id}/ - Eliminar un cargo fijo
+      parameters:
+      - in: query
+        name: codigo
+        schema:
+          type: string
+      - in: query
+        name: desembolso
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: periodicidad
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - cargos-fijos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCargoFijoList'
+          description: ''
+    post:
+      operationId: cargos_fijos_create
+      description: |-
+        ViewSet para gestionar Cargos Fijos.
+
+        Endpoints disponibles:
+        - GET /api/cargos-fijos/ - Listar todos los cargos fijos
+        - POST /api/cargos-fijos/ - Crear un nuevo cargo fijo
+        - GET /api/cargos-fijos/{id}/ - Obtener un cargo fijo específico
+        - PUT /api/cargos-fijos/{id}/ - Actualizar un cargo fijo completo
+        - PATCH /api/cargos-fijos/{id}/ - Actualizar parcialmente un cargo fijo
+        - DELETE /api/cargos-fijos/{id}/ - Eliminar un cargo fijo
+      tags:
+      - cargos-fijos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CargoFijoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CargoFijoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CargoFijoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CargoFijo'
+          description: ''
+  /dexter/api/cargos-fijos/{id}/:
+    get:
+      operationId: cargos_fijos_retrieve
+      description: |-
+        ViewSet para gestionar Cargos Fijos.
+
+        Endpoints disponibles:
+        - GET /api/cargos-fijos/ - Listar todos los cargos fijos
+        - POST /api/cargos-fijos/ - Crear un nuevo cargo fijo
+        - GET /api/cargos-fijos/{id}/ - Obtener un cargo fijo específico
+        - PUT /api/cargos-fijos/{id}/ - Actualizar un cargo fijo completo
+        - PATCH /api/cargos-fijos/{id}/ - Actualizar parcialmente un cargo fijo
+        - DELETE /api/cargos-fijos/{id}/ - Eliminar un cargo fijo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this cargo fijo.
+        required: true
+      tags:
+      - cargos-fijos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CargoFijo'
+          description: ''
+    put:
+      operationId: cargos_fijos_update
+      description: |-
+        ViewSet para gestionar Cargos Fijos.
+
+        Endpoints disponibles:
+        - GET /api/cargos-fijos/ - Listar todos los cargos fijos
+        - POST /api/cargos-fijos/ - Crear un nuevo cargo fijo
+        - GET /api/cargos-fijos/{id}/ - Obtener un cargo fijo específico
+        - PUT /api/cargos-fijos/{id}/ - Actualizar un cargo fijo completo
+        - PATCH /api/cargos-fijos/{id}/ - Actualizar parcialmente un cargo fijo
+        - DELETE /api/cargos-fijos/{id}/ - Eliminar un cargo fijo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this cargo fijo.
+        required: true
+      tags:
+      - cargos-fijos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CargoFijoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CargoFijoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CargoFijoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CargoFijo'
+          description: ''
+    patch:
+      operationId: cargos_fijos_partial_update
+      description: |-
+        ViewSet para gestionar Cargos Fijos.
+
+        Endpoints disponibles:
+        - GET /api/cargos-fijos/ - Listar todos los cargos fijos
+        - POST /api/cargos-fijos/ - Crear un nuevo cargo fijo
+        - GET /api/cargos-fijos/{id}/ - Obtener un cargo fijo específico
+        - PUT /api/cargos-fijos/{id}/ - Actualizar un cargo fijo completo
+        - PATCH /api/cargos-fijos/{id}/ - Actualizar parcialmente un cargo fijo
+        - DELETE /api/cargos-fijos/{id}/ - Eliminar un cargo fijo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this cargo fijo.
+        required: true
+      tags:
+      - cargos-fijos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCargoFijoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCargoFijoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCargoFijoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CargoFijo'
+          description: ''
+    delete:
+      operationId: cargos_fijos_destroy
+      description: |-
+        ViewSet para gestionar Cargos Fijos.
+
+        Endpoints disponibles:
+        - GET /api/cargos-fijos/ - Listar todos los cargos fijos
+        - POST /api/cargos-fijos/ - Crear un nuevo cargo fijo
+        - GET /api/cargos-fijos/{id}/ - Obtener un cargo fijo específico
+        - PUT /api/cargos-fijos/{id}/ - Actualizar un cargo fijo completo
+        - PATCH /api/cargos-fijos/{id}/ - Actualizar parcialmente un cargo fijo
+        - DELETE /api/cargos-fijos/{id}/ - Eliminar un cargo fijo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this cargo fijo.
+        required: true
+      tags:
+      - cargos-fijos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/desembolsos/:
+    get:
+      operationId: desembolsos_list
+      description: |-
+        ViewSet para gestionar Desembolsos.
+
+        Endpoints disponibles:
+        - GET /api/desembolsos/ - Listar todos los desembolsos
+        - POST /api/desembolsos/ - Crear un nuevo desembolso
+        - GET /api/desembolsos/{id}/ - Obtener un desembolso específico
+        - PUT /api/desembolsos/{id}/ - Actualizar un desembolso completo
+        - PATCH /api/desembolsos/{id}/ - Actualizar parcialmente un desembolso
+        - DELETE /api/desembolsos/{id}/ - Eliminar un desembolso
+        - GET /api/desembolsos/{id}/cargos_fijos/ - Obtener cargos fijos de un desembolso
+      parameters:
+      - in: query
+        name: aliado
+        schema:
+          type: string
+      - in: query
+        name: estado
+        schema:
+          type: string
+      - in: query
+        name: id_cliente
+        schema:
+          type: integer
+      - in: query
+        name: nit_beneficiario
+        schema:
+          type: integer
+      - in: query
+        name: obligacion
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: referencia
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - desembolsos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDesembolsoList'
+          description: ''
+    post:
+      operationId: desembolsos_create
+      description: |-
+        ViewSet para gestionar Desembolsos.
+
+        Endpoints disponibles:
+        - GET /api/desembolsos/ - Listar todos los desembolsos
+        - POST /api/desembolsos/ - Crear un nuevo desembolso
+        - GET /api/desembolsos/{id}/ - Obtener un desembolso específico
+        - PUT /api/desembolsos/{id}/ - Actualizar un desembolso completo
+        - PATCH /api/desembolsos/{id}/ - Actualizar parcialmente un desembolso
+        - DELETE /api/desembolsos/{id}/ - Eliminar un desembolso
+        - GET /api/desembolsos/{id}/cargos_fijos/ - Obtener cargos fijos de un desembolso
+      tags:
+      - desembolsos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesembolsoWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DesembolsoWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DesembolsoWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesembolsoWrite'
+          description: ''
+  /dexter/api/desembolsos/{id}/:
+    get:
+      operationId: desembolsos_retrieve
+      description: |-
+        ViewSet para gestionar Desembolsos.
+
+        Endpoints disponibles:
+        - GET /api/desembolsos/ - Listar todos los desembolsos
+        - POST /api/desembolsos/ - Crear un nuevo desembolso
+        - GET /api/desembolsos/{id}/ - Obtener un desembolso específico
+        - PUT /api/desembolsos/{id}/ - Actualizar un desembolso completo
+        - PATCH /api/desembolsos/{id}/ - Actualizar parcialmente un desembolso
+        - DELETE /api/desembolsos/{id}/ - Eliminar un desembolso
+        - GET /api/desembolsos/{id}/cargos_fijos/ - Obtener cargos fijos de un desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this desembolso.
+        required: true
+      tags:
+      - desembolsos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Desembolso'
+          description: ''
+    put:
+      operationId: desembolsos_update
+      description: |-
+        ViewSet para gestionar Desembolsos.
+
+        Endpoints disponibles:
+        - GET /api/desembolsos/ - Listar todos los desembolsos
+        - POST /api/desembolsos/ - Crear un nuevo desembolso
+        - GET /api/desembolsos/{id}/ - Obtener un desembolso específico
+        - PUT /api/desembolsos/{id}/ - Actualizar un desembolso completo
+        - PATCH /api/desembolsos/{id}/ - Actualizar parcialmente un desembolso
+        - DELETE /api/desembolsos/{id}/ - Eliminar un desembolso
+        - GET /api/desembolsos/{id}/cargos_fijos/ - Obtener cargos fijos de un desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this desembolso.
+        required: true
+      tags:
+      - desembolsos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesembolsoWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DesembolsoWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DesembolsoWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesembolsoWrite'
+          description: ''
+    patch:
+      operationId: desembolsos_partial_update
+      description: |-
+        ViewSet para gestionar Desembolsos.
+
+        Endpoints disponibles:
+        - GET /api/desembolsos/ - Listar todos los desembolsos
+        - POST /api/desembolsos/ - Crear un nuevo desembolso
+        - GET /api/desembolsos/{id}/ - Obtener un desembolso específico
+        - PUT /api/desembolsos/{id}/ - Actualizar un desembolso completo
+        - PATCH /api/desembolsos/{id}/ - Actualizar parcialmente un desembolso
+        - DELETE /api/desembolsos/{id}/ - Eliminar un desembolso
+        - GET /api/desembolsos/{id}/cargos_fijos/ - Obtener cargos fijos de un desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this desembolso.
+        required: true
+      tags:
+      - desembolsos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDesembolsoWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDesembolsoWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDesembolsoWriteRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesembolsoWrite'
+          description: ''
+    delete:
+      operationId: desembolsos_destroy
+      description: |-
+        ViewSet para gestionar Desembolsos.
+
+        Endpoints disponibles:
+        - GET /api/desembolsos/ - Listar todos los desembolsos
+        - POST /api/desembolsos/ - Crear un nuevo desembolso
+        - GET /api/desembolsos/{id}/ - Obtener un desembolso específico
+        - PUT /api/desembolsos/{id}/ - Actualizar un desembolso completo
+        - PATCH /api/desembolsos/{id}/ - Actualizar parcialmente un desembolso
+        - DELETE /api/desembolsos/{id}/ - Eliminar un desembolso
+        - GET /api/desembolsos/{id}/cargos_fijos/ - Obtener cargos fijos de un desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this desembolso.
+        required: true
+      tags:
+      - desembolsos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/desembolsos/{id}/cargos_fijos/:
+    get:
+      operationId: desembolsos_cargos_fijos_retrieve
+      description: Endpoint personalizado para obtener los cargos fijos de un desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this desembolso.
+        required: true
+      tags:
+      - desembolsos
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesembolsoWrite'
+          description: ''
+  /dexter/api/ejecuciones/:
+    get:
+      operationId: ejecuciones_list
+      description: |-
+        API para gestionar ejecuciones del ETL.
+
+        Endpoints:
+        - GET /api/ejecuciones/ - Listar todas las ejecuciones
+        - POST /api/ejecuciones/ - Crear nueva ejecución
+        - GET /api/ejecuciones/{id}/ - Obtener una ejecución
+        - PATCH /api/ejecuciones/{id}/ - Actualizar ejecución
+        - GET /api/ejecuciones/pendientes/ - Obtener ejecuciones pendientes
+        - POST /api/ejecuciones/{id}/completar/ - Marcar como completada
+        - POST /api/ejecuciones/{id}/fallar/ - Marcar como fallida
+        - GET /api/ejecuciones/{id}/progreso/ - Obtener progreso detallado
+      parameters:
+      - in: query
+        name: estado
+        schema:
+          type: string
+          enum:
+          - COMPLETADO
+          - EN_PROGRESO
+          - FALLIDO
+          - INICIADO
+          - PAUSADO
+        description: |-
+          * `INICIADO` - Iniciado
+          * `EN_PROGRESO` - En Progreso
+          * `COMPLETADO` - Completado
+          * `FALLIDO` - Fallido
+          * `PAUSADO` - Pausado
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: tipo_proceso
+        schema:
+          type: string
+          enum:
+          - DESEMBOLSO
+          - GARANTIA
+        description: |-
+          * `DESEMBOLSO` - Proceso de Desembolso
+          * `GARANTIA` - Proceso de Garantía
+      tags:
+      - ejecuciones
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEjecucionETLList'
+          description: ''
+    post:
+      operationId: ejecuciones_create
+      description: |-
+        API para gestionar ejecuciones del ETL.
+
+        Endpoints:
+        - GET /api/ejecuciones/ - Listar todas las ejecuciones
+        - POST /api/ejecuciones/ - Crear nueva ejecución
+        - GET /api/ejecuciones/{id}/ - Obtener una ejecución
+        - PATCH /api/ejecuciones/{id}/ - Actualizar ejecución
+        - GET /api/ejecuciones/pendientes/ - Obtener ejecuciones pendientes
+        - POST /api/ejecuciones/{id}/completar/ - Marcar como completada
+        - POST /api/ejecuciones/{id}/fallar/ - Marcar como fallida
+        - GET /api/ejecuciones/{id}/progreso/ - Obtener progreso detallado
+      tags:
+      - ejecuciones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+  /dexter/api/ejecuciones/{id}/:
+    get:
+      operationId: ejecuciones_retrieve
+      description: |-
+        API para gestionar ejecuciones del ETL.
+
+        Endpoints:
+        - GET /api/ejecuciones/ - Listar todas las ejecuciones
+        - POST /api/ejecuciones/ - Crear nueva ejecución
+        - GET /api/ejecuciones/{id}/ - Obtener una ejecución
+        - PATCH /api/ejecuciones/{id}/ - Actualizar ejecución
+        - GET /api/ejecuciones/pendientes/ - Obtener ejecuciones pendientes
+        - POST /api/ejecuciones/{id}/completar/ - Marcar como completada
+        - POST /api/ejecuciones/{id}/fallar/ - Marcar como fallida
+        - GET /api/ejecuciones/{id}/progreso/ - Obtener progreso detallado
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+    put:
+      operationId: ejecuciones_update
+      description: |-
+        API para gestionar ejecuciones del ETL.
+
+        Endpoints:
+        - GET /api/ejecuciones/ - Listar todas las ejecuciones
+        - POST /api/ejecuciones/ - Crear nueva ejecución
+        - GET /api/ejecuciones/{id}/ - Obtener una ejecución
+        - PATCH /api/ejecuciones/{id}/ - Actualizar ejecución
+        - GET /api/ejecuciones/pendientes/ - Obtener ejecuciones pendientes
+        - POST /api/ejecuciones/{id}/completar/ - Marcar como completada
+        - POST /api/ejecuciones/{id}/fallar/ - Marcar como fallida
+        - GET /api/ejecuciones/{id}/progreso/ - Obtener progreso detallado
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+    patch:
+      operationId: ejecuciones_partial_update
+      description: |-
+        API para gestionar ejecuciones del ETL.
+
+        Endpoints:
+        - GET /api/ejecuciones/ - Listar todas las ejecuciones
+        - POST /api/ejecuciones/ - Crear nueva ejecución
+        - GET /api/ejecuciones/{id}/ - Obtener una ejecución
+        - PATCH /api/ejecuciones/{id}/ - Actualizar ejecución
+        - GET /api/ejecuciones/pendientes/ - Obtener ejecuciones pendientes
+        - POST /api/ejecuciones/{id}/completar/ - Marcar como completada
+        - POST /api/ejecuciones/{id}/fallar/ - Marcar como fallida
+        - GET /api/ejecuciones/{id}/progreso/ - Obtener progreso detallado
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEjecucionETLRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEjecucionETLRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEjecucionETLRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+    delete:
+      operationId: ejecuciones_destroy
+      description: |-
+        API para gestionar ejecuciones del ETL.
+
+        Endpoints:
+        - GET /api/ejecuciones/ - Listar todas las ejecuciones
+        - POST /api/ejecuciones/ - Crear nueva ejecución
+        - GET /api/ejecuciones/{id}/ - Obtener una ejecución
+        - PATCH /api/ejecuciones/{id}/ - Actualizar ejecución
+        - GET /api/ejecuciones/pendientes/ - Obtener ejecuciones pendientes
+        - POST /api/ejecuciones/{id}/completar/ - Marcar como completada
+        - POST /api/ejecuciones/{id}/fallar/ - Marcar como fallida
+        - GET /api/ejecuciones/{id}/progreso/ - Obtener progreso detallado
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/ejecuciones/{id}/completar/:
+    post:
+      operationId: ejecuciones_completar_create
+      description: Marca una ejecución como completada
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+  /dexter/api/ejecuciones/{id}/fallar/:
+    post:
+      operationId: ejecuciones_fallar_create
+      description: Marca una ejecución como fallida
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+  /dexter/api/ejecuciones/{id}/progreso/:
+    get:
+      operationId: ejecuciones_progreso_retrieve
+      description: Obtiene el progreso detallado de una ejecución
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+  /dexter/api/ejecuciones/{id}/retomar/:
+    post:
+      operationId: ejecuciones_retomar_create
+      description: Retoma una ejecución pausada o fallida
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Ejecución ETL.
+        required: true
+      tags:
+      - ejecuciones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+  /dexter/api/ejecuciones/crear_con_plan/:
+    post:
+      operationId: ejecuciones_crear_con_plan_create
+      description: |-
+        Crea una ejecución con su plan completo.
+
+        Body:
+        {
+            "tipo_proceso": "DESEMBOLSO",
+            "total_registros": 100,
+            "descripcion": "ETL de prueba",
+            "desembolso_ids": [1, 2, 3, ...]  // si tipo_proceso='DESEMBOLSO'
+            "garantia_ids": [1, 2, 3, ...]   // si tipo_proceso='GARANTIA'
+        }
+      tags:
+      - ejecuciones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EjecucionETLRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+  /dexter/api/ejecuciones/pendientes/:
+    get:
+      operationId: ejecuciones_pendientes_retrieve
+      description: Obtiene ejecuciones que no están completadas
+      tags:
+      - ejecuciones
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EjecucionETL'
+          description: ''
+  /dexter/api/etapas-desembolso/:
+    get:
+      operationId: etapas_desembolso_list
+      description: API para gestionar etapas de tipo de desembolso.
+      parameters:
+      - in: query
+        name: nombre
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - etapas-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEtapaTipoDesembolsoList'
+          description: ''
+    post:
+      operationId: etapas_desembolso_create
+      description: API para gestionar etapas de tipo de desembolso.
+      tags:
+      - etapas-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoDesembolso'
+          description: ''
+  /dexter/api/etapas-desembolso/{id}/:
+    get:
+      operationId: etapas_desembolso_retrieve
+      description: API para gestionar etapas de tipo de desembolso.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Desembolso.
+        required: true
+      tags:
+      - etapas-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoDesembolso'
+          description: ''
+    put:
+      operationId: etapas_desembolso_update
+      description: API para gestionar etapas de tipo de desembolso.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Desembolso.
+        required: true
+      tags:
+      - etapas-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoDesembolso'
+          description: ''
+    patch:
+      operationId: etapas_desembolso_partial_update
+      description: API para gestionar etapas de tipo de desembolso.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Desembolso.
+        required: true
+      tags:
+      - etapas-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaTipoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaTipoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaTipoDesembolsoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoDesembolso'
+          description: ''
+    delete:
+      operationId: etapas_desembolso_destroy
+      description: API para gestionar etapas de tipo de desembolso.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Desembolso.
+        required: true
+      tags:
+      - etapas-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/etapas-garantia/:
+    get:
+      operationId: etapas_garantia_list
+      description: API para gestionar etapas de tipo de garantía.
+      parameters:
+      - in: query
+        name: nombre
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - etapas-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEtapaTipoGarantiaList'
+          description: ''
+    post:
+      operationId: etapas_garantia_create
+      description: API para gestionar etapas de tipo de garantía.
+      tags:
+      - etapas-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoGarantia'
+          description: ''
+  /dexter/api/etapas-garantia/{id}/:
+    get:
+      operationId: etapas_garantia_retrieve
+      description: API para gestionar etapas de tipo de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Garantía.
+        required: true
+      tags:
+      - etapas-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoGarantia'
+          description: ''
+    put:
+      operationId: etapas_garantia_update
+      description: API para gestionar etapas de tipo de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Garantía.
+        required: true
+      tags:
+      - etapas-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaTipoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoGarantia'
+          description: ''
+    patch:
+      operationId: etapas_garantia_partial_update
+      description: API para gestionar etapas de tipo de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Garantía.
+        required: true
+      tags:
+      - etapas-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaTipoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaTipoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaTipoGarantiaRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaTipoGarantia'
+          description: ''
+    delete:
+      operationId: etapas_garantia_destroy
+      description: API para gestionar etapas de tipo de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Tipo de Garantía.
+        required: true
+      tags:
+      - etapas-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/etapas-proceso-desembolso/:
+    get:
+      operationId: etapas_proceso_desembolso_list
+      description: |-
+        API para gestionar etapas individuales de procesos de desembolso.
+
+        Endpoints:
+        - GET /api/etapas-proceso-desembolso/ - Listar etapas
+        - GET /api/etapas-proceso-desembolso/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-desembolso/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-desembolso/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: query
+        name: estado
+        schema:
+          type: string
+          enum:
+          - COMPLETADO
+          - EN_PROGRESO
+          - ERROR
+          - OMITIDA
+          - PENDIENTE
+        description: |-
+          * `PENDIENTE` - Pendiente
+          * `EN_PROGRESO` - En Progreso
+          * `COMPLETADO` - Completado
+          * `ERROR` - Error
+          * `OMITIDA` - Omitida
+      - in: query
+        name: etapa
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: proceso
+        schema:
+          type: integer
+      tags:
+      - etapas-proceso-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEtapaProcesoDesembolsoList'
+          description: ''
+    post:
+      operationId: etapas_proceso_desembolso_create
+      description: |-
+        API para gestionar etapas individuales de procesos de desembolso.
+
+        Endpoints:
+        - GET /api/etapas-proceso-desembolso/ - Listar etapas
+        - GET /api/etapas-proceso-desembolso/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-desembolso/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-desembolso/{id}/reintentar/ - Reintentar etapa
+      tags:
+      - etapas-proceso-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+  /dexter/api/etapas-proceso-desembolso/{id}/:
+    get:
+      operationId: etapas_proceso_desembolso_retrieve
+      description: |-
+        API para gestionar etapas individuales de procesos de desembolso.
+
+        Endpoints:
+        - GET /api/etapas-proceso-desembolso/ - Listar etapas
+        - GET /api/etapas-proceso-desembolso/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-desembolso/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-desembolso/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+    put:
+      operationId: etapas_proceso_desembolso_update
+      description: |-
+        API para gestionar etapas individuales de procesos de desembolso.
+
+        Endpoints:
+        - GET /api/etapas-proceso-desembolso/ - Listar etapas
+        - GET /api/etapas-proceso-desembolso/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-desembolso/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-desembolso/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+    patch:
+      operationId: etapas_proceso_desembolso_partial_update
+      description: |-
+        API para gestionar etapas individuales de procesos de desembolso.
+
+        Endpoints:
+        - GET /api/etapas-proceso-desembolso/ - Listar etapas
+        - GET /api/etapas-proceso-desembolso/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-desembolso/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-desembolso/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaProcesoDesembolsoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+    delete:
+      operationId: etapas_proceso_desembolso_destroy
+      description: |-
+        API para gestionar etapas individuales de procesos de desembolso.
+
+        Endpoints:
+        - GET /api/etapas-proceso-desembolso/ - Listar etapas
+        - GET /api/etapas-proceso-desembolso/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-desembolso/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-desembolso/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-desembolso/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/etapas-proceso-desembolso/{id}/completar/:
+    post:
+      operationId: etapas_proceso_desembolso_completar_create
+      description: Completa una etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+  /dexter/api/etapas-proceso-desembolso/{id}/iniciar/:
+    post:
+      operationId: etapas_proceso_desembolso_iniciar_create
+      description: Inicia una etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+  /dexter/api/etapas-proceso-desembolso/{id}/marcar_error/:
+    post:
+      operationId: etapas_proceso_desembolso_marcar_error_create
+      description: Marca una etapa como error
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+  /dexter/api/etapas-proceso-desembolso/{id}/reintentar/:
+    post:
+      operationId: etapas_proceso_desembolso_reintentar_create
+      description: Reintenta una etapa que falló
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Desembolso.
+        required: true
+      tags:
+      - etapas-proceso-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          description: ''
+  /dexter/api/etapas-proceso-garantia/:
+    get:
+      operationId: etapas_proceso_garantia_list
+      description: |-
+        API para gestionar etapas individuales de procesos de garantía.
+
+        Endpoints:
+        - GET /api/etapas-proceso-garantia/ - Listar etapas
+        - GET /api/etapas-proceso-garantia/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-garantia/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-garantia/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-garantia/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-garantia/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: query
+        name: estado
+        schema:
+          type: string
+          enum:
+          - COMPLETADO
+          - EN_PROGRESO
+          - ERROR
+          - OMITIDA
+          - PENDIENTE
+        description: |-
+          * `PENDIENTE` - Pendiente
+          * `EN_PROGRESO` - En Progreso
+          * `COMPLETADO` - Completado
+          * `ERROR` - Error
+          * `OMITIDA` - Omitida
+      - in: query
+        name: etapa
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: proceso
+        schema:
+          type: integer
+      tags:
+      - etapas-proceso-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEtapaProcesoGarantiaList'
+          description: ''
+    post:
+      operationId: etapas_proceso_garantia_create
+      description: |-
+        API para gestionar etapas individuales de procesos de garantía.
+
+        Endpoints:
+        - GET /api/etapas-proceso-garantia/ - Listar etapas
+        - GET /api/etapas-proceso-garantia/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-garantia/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-garantia/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-garantia/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-garantia/{id}/reintentar/ - Reintentar etapa
+      tags:
+      - etapas-proceso-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+  /dexter/api/etapas-proceso-garantia/{id}/:
+    get:
+      operationId: etapas_proceso_garantia_retrieve
+      description: |-
+        API para gestionar etapas individuales de procesos de garantía.
+
+        Endpoints:
+        - GET /api/etapas-proceso-garantia/ - Listar etapas
+        - GET /api/etapas-proceso-garantia/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-garantia/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-garantia/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-garantia/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-garantia/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+    put:
+      operationId: etapas_proceso_garantia_update
+      description: |-
+        API para gestionar etapas individuales de procesos de garantía.
+
+        Endpoints:
+        - GET /api/etapas-proceso-garantia/ - Listar etapas
+        - GET /api/etapas-proceso-garantia/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-garantia/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-garantia/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-garantia/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-garantia/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+    patch:
+      operationId: etapas_proceso_garantia_partial_update
+      description: |-
+        API para gestionar etapas individuales de procesos de garantía.
+
+        Endpoints:
+        - GET /api/etapas-proceso-garantia/ - Listar etapas
+        - GET /api/etapas-proceso-garantia/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-garantia/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-garantia/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-garantia/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-garantia/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEtapaProcesoGarantiaRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+    delete:
+      operationId: etapas_proceso_garantia_destroy
+      description: |-
+        API para gestionar etapas individuales de procesos de garantía.
+
+        Endpoints:
+        - GET /api/etapas-proceso-garantia/ - Listar etapas
+        - GET /api/etapas-proceso-garantia/{id}/ - Obtener etapa
+        - POST /api/etapas-proceso-garantia/{id}/iniciar/ - Iniciar etapa
+        - POST /api/etapas-proceso-garantia/{id}/completar/ - Completar etapa
+        - POST /api/etapas-proceso-garantia/{id}/marcar_error/ - Marcar error
+        - POST /api/etapas-proceso-garantia/{id}/reintentar/ - Reintentar etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/etapas-proceso-garantia/{id}/completar/:
+    post:
+      operationId: etapas_proceso_garantia_completar_create
+      description: Completa una etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+  /dexter/api/etapas-proceso-garantia/{id}/iniciar/:
+    post:
+      operationId: etapas_proceso_garantia_iniciar_create
+      description: Inicia una etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+  /dexter/api/etapas-proceso-garantia/{id}/marcar_error/:
+    post:
+      operationId: etapas_proceso_garantia_marcar_error_create
+      description: Marca una etapa como error
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+  /dexter/api/etapas-proceso-garantia/{id}/reintentar/:
+    post:
+      operationId: etapas_proceso_garantia_reintentar_create
+      description: Reintenta una etapa que falló
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Etapa de Proceso Garantía.
+        required: true
+      tags:
+      - etapas-proceso-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EtapaProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtapaProcesoGarantia'
+          description: ''
+  /dexter/api/garantias/:
+    get:
+      operationId: garantias_list
+      description: |-
+        ViewSet para gestionar Garantías.
+
+        Endpoints disponibles:
+        - GET /api/garantias/ - Listar todas las garantías
+        - POST /api/garantias/ - Crear una nueva garantía
+        - GET /api/garantias/{id}/ - Obtener una garantía específica
+        - PUT /api/garantias/{id}/ - Actualizar una garantía completa
+        - PATCH /api/garantias/{id}/ - Actualizar parcialmente una garantía
+        - DELETE /api/garantias/{id}/ - Eliminar una garantía
+      parameters:
+      - in: query
+        name: cod_aseguradora
+        schema:
+          type: string
+      - in: query
+        name: cod_fasecolda
+        schema:
+          type: string
+      - in: query
+        name: estado
+        schema:
+          type: string
+      - in: query
+        name: id_cliente
+        schema:
+          type: integer
+      - in: query
+        name: id_garante
+        schema:
+          type: integer
+      - in: query
+        name: obligacion
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: placa
+        schema:
+          type: string
+      - in: query
+        name: referencia
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - garantias
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGarantiaList'
+          description: ''
+    post:
+      operationId: garantias_create
+      description: |-
+        ViewSet para gestionar Garantías.
+
+        Endpoints disponibles:
+        - GET /api/garantias/ - Listar todas las garantías
+        - POST /api/garantias/ - Crear una nueva garantía
+        - GET /api/garantias/{id}/ - Obtener una garantía específica
+        - PUT /api/garantias/{id}/ - Actualizar una garantía completa
+        - PATCH /api/garantias/{id}/ - Actualizar parcialmente una garantía
+        - DELETE /api/garantias/{id}/ - Eliminar una garantía
+      tags:
+      - garantias
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Garantia'
+          description: ''
+  /dexter/api/garantias/{id}/:
+    get:
+      operationId: garantias_retrieve
+      description: |-
+        ViewSet para gestionar Garantías.
+
+        Endpoints disponibles:
+        - GET /api/garantias/ - Listar todas las garantías
+        - POST /api/garantias/ - Crear una nueva garantía
+        - GET /api/garantias/{id}/ - Obtener una garantía específica
+        - PUT /api/garantias/{id}/ - Actualizar una garantía completa
+        - PATCH /api/garantias/{id}/ - Actualizar parcialmente una garantía
+        - DELETE /api/garantias/{id}/ - Eliminar una garantía
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this garantia.
+        required: true
+      tags:
+      - garantias
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Garantia'
+          description: ''
+    put:
+      operationId: garantias_update
+      description: |-
+        ViewSet para gestionar Garantías.
+
+        Endpoints disponibles:
+        - GET /api/garantias/ - Listar todas las garantías
+        - POST /api/garantias/ - Crear una nueva garantía
+        - GET /api/garantias/{id}/ - Obtener una garantía específica
+        - PUT /api/garantias/{id}/ - Actualizar una garantía completa
+        - PATCH /api/garantias/{id}/ - Actualizar parcialmente una garantía
+        - DELETE /api/garantias/{id}/ - Eliminar una garantía
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this garantia.
+        required: true
+      tags:
+      - garantias
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Garantia'
+          description: ''
+    patch:
+      operationId: garantias_partial_update
+      description: |-
+        ViewSet para gestionar Garantías.
+
+        Endpoints disponibles:
+        - GET /api/garantias/ - Listar todas las garantías
+        - POST /api/garantias/ - Crear una nueva garantía
+        - GET /api/garantias/{id}/ - Obtener una garantía específica
+        - PUT /api/garantias/{id}/ - Actualizar una garantía completa
+        - PATCH /api/garantias/{id}/ - Actualizar parcialmente una garantía
+        - DELETE /api/garantias/{id}/ - Eliminar una garantía
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this garantia.
+        required: true
+      tags:
+      - garantias
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGarantiaRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Garantia'
+          description: ''
+    delete:
+      operationId: garantias_destroy
+      description: |-
+        ViewSet para gestionar Garantías.
+
+        Endpoints disponibles:
+        - GET /api/garantias/ - Listar todas las garantías
+        - POST /api/garantias/ - Crear una nueva garantía
+        - GET /api/garantias/{id}/ - Obtener una garantía específica
+        - PUT /api/garantias/{id}/ - Actualizar una garantía completa
+        - PATCH /api/garantias/{id}/ - Actualizar parcialmente una garantía
+        - DELETE /api/garantias/{id}/ - Eliminar una garantía
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this garantia.
+        required: true
+      tags:
+      - garantias
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/procesos-desembolso/:
+    get:
+      operationId: procesos_desembolso_list
+      description: |-
+        API para gestionar procesos de desembolso.
+
+        Endpoints:
+        - GET /api/procesos-desembolso/ - Listar procesos
+        - GET /api/procesos-desembolso/{id}/ - Obtener proceso
+        - GET /api/procesos-desembolso/{id}/siguiente_etapa/ - Obtener siguiente etapa
+      parameters:
+      - in: query
+        name: desembolso
+        schema:
+          type: integer
+      - in: query
+        name: ejecucion
+        schema:
+          type: integer
+      - in: query
+        name: estado_general
+        schema:
+          type: string
+          enum:
+          - COMPLETADO
+          - EN_PROGRESO
+          - ERROR
+          - PAUSADO
+          - PENDIENTE
+        description: |-
+          * `PENDIENTE` - Pendiente
+          * `EN_PROGRESO` - En Progreso
+          * `COMPLETADO` - Completado
+          * `ERROR` - Error
+          * `PAUSADO` - Pausado
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - procesos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProcesoDesembolsoList'
+          description: ''
+    post:
+      operationId: procesos_desembolso_create
+      description: |-
+        API para gestionar procesos de desembolso.
+
+        Endpoints:
+        - GET /api/procesos-desembolso/ - Listar procesos
+        - GET /api/procesos-desembolso/{id}/ - Obtener proceso
+        - GET /api/procesos-desembolso/{id}/siguiente_etapa/ - Obtener siguiente etapa
+      tags:
+      - procesos-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoDesembolso'
+          description: ''
+  /dexter/api/procesos-desembolso/{id}/:
+    get:
+      operationId: procesos_desembolso_retrieve
+      description: |-
+        API para gestionar procesos de desembolso.
+
+        Endpoints:
+        - GET /api/procesos-desembolso/ - Listar procesos
+        - GET /api/procesos-desembolso/{id}/ - Obtener proceso
+        - GET /api/procesos-desembolso/{id}/siguiente_etapa/ - Obtener siguiente etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Desembolso.
+        required: true
+      tags:
+      - procesos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoDesembolso'
+          description: ''
+    put:
+      operationId: procesos_desembolso_update
+      description: |-
+        API para gestionar procesos de desembolso.
+
+        Endpoints:
+        - GET /api/procesos-desembolso/ - Listar procesos
+        - GET /api/procesos-desembolso/{id}/ - Obtener proceso
+        - GET /api/procesos-desembolso/{id}/siguiente_etapa/ - Obtener siguiente etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Desembolso.
+        required: true
+      tags:
+      - procesos-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProcesoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoDesembolso'
+          description: ''
+    patch:
+      operationId: procesos_desembolso_partial_update
+      description: |-
+        API para gestionar procesos de desembolso.
+
+        Endpoints:
+        - GET /api/procesos-desembolso/ - Listar procesos
+        - GET /api/procesos-desembolso/{id}/ - Obtener proceso
+        - GET /api/procesos-desembolso/{id}/siguiente_etapa/ - Obtener siguiente etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Desembolso.
+        required: true
+      tags:
+      - procesos-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProcesoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProcesoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProcesoDesembolsoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoDesembolso'
+          description: ''
+    delete:
+      operationId: procesos_desembolso_destroy
+      description: |-
+        API para gestionar procesos de desembolso.
+
+        Endpoints:
+        - GET /api/procesos-desembolso/ - Listar procesos
+        - GET /api/procesos-desembolso/{id}/ - Obtener proceso
+        - GET /api/procesos-desembolso/{id}/siguiente_etapa/ - Obtener siguiente etapa
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Desembolso.
+        required: true
+      tags:
+      - procesos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/procesos-desembolso/{id}/siguiente_etapa/:
+    get:
+      operationId: procesos_desembolso_siguiente_etapa_retrieve
+      description: Obtiene la siguiente etapa pendiente del proceso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Desembolso.
+        required: true
+      tags:
+      - procesos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoDesembolso'
+          description: ''
+  /dexter/api/procesos-garantia/:
+    get:
+      operationId: procesos_garantia_list
+      description: |-
+        API para gestionar procesos de garantía.
+        Similar a ProcesoDesembolsoViewSet pero para garantías.
+      parameters:
+      - in: query
+        name: ejecucion
+        schema:
+          type: integer
+      - in: query
+        name: estado_general
+        schema:
+          type: string
+          enum:
+          - COMPLETADO
+          - EN_PROGRESO
+          - ERROR
+          - PAUSADO
+          - PENDIENTE
+        description: |-
+          * `PENDIENTE` - Pendiente
+          * `EN_PROGRESO` - En Progreso
+          * `COMPLETADO` - Completado
+          * `ERROR` - Error
+          * `PAUSADO` - Pausado
+      - in: query
+        name: garantia
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - procesos-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProcesoGarantiaList'
+          description: ''
+    post:
+      operationId: procesos_garantia_create
+      description: |-
+        API para gestionar procesos de garantía.
+        Similar a ProcesoDesembolsoViewSet pero para garantías.
+      tags:
+      - procesos-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoGarantia'
+          description: ''
+  /dexter/api/procesos-garantia/{id}/:
+    get:
+      operationId: procesos_garantia_retrieve
+      description: |-
+        API para gestionar procesos de garantía.
+        Similar a ProcesoDesembolsoViewSet pero para garantías.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Garantía.
+        required: true
+      tags:
+      - procesos-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoGarantia'
+          description: ''
+    put:
+      operationId: procesos_garantia_update
+      description: |-
+        API para gestionar procesos de garantía.
+        Similar a ProcesoDesembolsoViewSet pero para garantías.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Garantía.
+        required: true
+      tags:
+      - procesos-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProcesoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoGarantia'
+          description: ''
+    patch:
+      operationId: procesos_garantia_partial_update
+      description: |-
+        API para gestionar procesos de garantía.
+        Similar a ProcesoDesembolsoViewSet pero para garantías.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Garantía.
+        required: true
+      tags:
+      - procesos-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProcesoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProcesoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProcesoGarantiaRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoGarantia'
+          description: ''
+    delete:
+      operationId: procesos_garantia_destroy
+      description: |-
+        API para gestionar procesos de garantía.
+        Similar a ProcesoDesembolsoViewSet pero para garantías.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Garantía.
+        required: true
+      tags:
+      - procesos-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/procesos-garantia/{id}/siguiente_etapa/:
+    get:
+      operationId: procesos_garantia_siguiente_etapa_retrieve
+      description: Obtiene la siguiente etapa pendiente del proceso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Proceso de Garantía.
+        required: true
+      tags:
+      - procesos-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcesoGarantia'
+          description: ''
+  /dexter/api/tipos-desembolso/:
+    get:
+      operationId: tipos_desembolso_list
+      description: |-
+        API para gestionar tipos de desembolso.
+        Endpoints:
+        - GET /api/tipos-desembolso/ - Listar tipos de desembolso
+        - GET /api/tipos-desembolso/{id}/ - Obtener un tipo de desembolso
+        - GET /api/tipos-desembolso/{id}/etapas/ - Obtener las etapas de un tipo de desembolso
+      parameters:
+      - in: query
+        name: nombre
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - tipos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTipoDesembolsoList'
+          description: ''
+    post:
+      operationId: tipos_desembolso_create
+      description: |-
+        API para gestionar tipos de desembolso.
+        Endpoints:
+        - GET /api/tipos-desembolso/ - Listar tipos de desembolso
+        - GET /api/tipos-desembolso/{id}/ - Obtener un tipo de desembolso
+        - GET /api/tipos-desembolso/{id}/etapas/ - Obtener las etapas de un tipo de desembolso
+      tags:
+      - tipos-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TipoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TipoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TipoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoDesembolso'
+          description: ''
+  /dexter/api/tipos-desembolso/{id}/:
+    get:
+      operationId: tipos_desembolso_retrieve
+      description: |-
+        API para gestionar tipos de desembolso.
+        Endpoints:
+        - GET /api/tipos-desembolso/ - Listar tipos de desembolso
+        - GET /api/tipos-desembolso/{id}/ - Obtener un tipo de desembolso
+        - GET /api/tipos-desembolso/{id}/etapas/ - Obtener las etapas de un tipo de desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Desembolso.
+        required: true
+      tags:
+      - tipos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoDesembolso'
+          description: ''
+    put:
+      operationId: tipos_desembolso_update
+      description: |-
+        API para gestionar tipos de desembolso.
+        Endpoints:
+        - GET /api/tipos-desembolso/ - Listar tipos de desembolso
+        - GET /api/tipos-desembolso/{id}/ - Obtener un tipo de desembolso
+        - GET /api/tipos-desembolso/{id}/etapas/ - Obtener las etapas de un tipo de desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Desembolso.
+        required: true
+      tags:
+      - tipos-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TipoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TipoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TipoDesembolsoRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoDesembolso'
+          description: ''
+    patch:
+      operationId: tipos_desembolso_partial_update
+      description: |-
+        API para gestionar tipos de desembolso.
+        Endpoints:
+        - GET /api/tipos-desembolso/ - Listar tipos de desembolso
+        - GET /api/tipos-desembolso/{id}/ - Obtener un tipo de desembolso
+        - GET /api/tipos-desembolso/{id}/etapas/ - Obtener las etapas de un tipo de desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Desembolso.
+        required: true
+      tags:
+      - tipos-desembolso
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTipoDesembolsoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTipoDesembolsoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTipoDesembolsoRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoDesembolso'
+          description: ''
+    delete:
+      operationId: tipos_desembolso_destroy
+      description: |-
+        API para gestionar tipos de desembolso.
+        Endpoints:
+        - GET /api/tipos-desembolso/ - Listar tipos de desembolso
+        - GET /api/tipos-desembolso/{id}/ - Obtener un tipo de desembolso
+        - GET /api/tipos-desembolso/{id}/etapas/ - Obtener las etapas de un tipo de desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Desembolso.
+        required: true
+      tags:
+      - tipos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /dexter/api/tipos-desembolso/{id}/etapas/:
+    get:
+      operationId: tipos_desembolso_etapas_retrieve
+      description: Obtiene las etapas de un tipo de desembolso
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Desembolso.
+        required: true
+      tags:
+      - tipos-desembolso
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoDesembolso'
+          description: ''
+  /dexter/api/tipos-garantia/:
+    get:
+      operationId: tipos_garantia_list
+      description: API para gestionar tipos de garantía.
+      parameters:
+      - in: query
+        name: nombre
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - tipos-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTipoGarantiaList'
+          description: ''
+    post:
+      operationId: tipos_garantia_create
+      description: API para gestionar tipos de garantía.
+      tags:
+      - tipos-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TipoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TipoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TipoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoGarantia'
+          description: ''
+  /dexter/api/tipos-garantia/{id}/:
+    get:
+      operationId: tipos_garantia_retrieve
+      description: API para gestionar tipos de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Garantía.
+        required: true
+      tags:
+      - tipos-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoGarantia'
+          description: ''
+    put:
+      operationId: tipos_garantia_update
+      description: API para gestionar tipos de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Garantía.
+        required: true
+      tags:
+      - tipos-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TipoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TipoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TipoGarantiaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoGarantia'
+          description: ''
+    patch:
+      operationId: tipos_garantia_partial_update
+      description: API para gestionar tipos de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Garantía.
+        required: true
+      tags:
+      - tipos-garantia
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTipoGarantiaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTipoGarantiaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTipoGarantiaRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoGarantia'
+          description: ''
+    delete:
+      operationId: tipos_garantia_destroy
+      description: API para gestionar tipos de garantía.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Tipo de Garantía.
+        required: true
+      tags:
+      - tipos-garantia
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    CargoFijo:
+      type: object
+      description: Serializer para el modelo CargoFijo
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        fecha_efectiva:
+          type: integer
+          nullable: true
+        fecha_revision:
+          type: integer
+          nullable: true
+        codigo:
+          type: string
+          maxLength: 10
+        nombre_cargo_fijo:
+          type: string
+          maxLength: 255
+        periodicidad:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor:
+          type: number
+          format: double
+          nullable: true
+        desembolso:
+          type: integer
+      required:
+      - codigo
+      - desembolso
+      - id
+      - nombre_cargo_fijo
+    CargoFijoRequest:
+      type: object
+      description: Serializer para el modelo CargoFijo
+      properties:
+        fecha_efectiva:
+          type: integer
+          nullable: true
+        fecha_revision:
+          type: integer
+          nullable: true
+        codigo:
+          type: string
+          minLength: 1
+          maxLength: 10
+        nombre_cargo_fijo:
+          type: string
+          minLength: 1
+          maxLength: 255
+        periodicidad:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor:
+          type: number
+          format: double
+          nullable: true
+        desembolso:
+          type: integer
+      required:
+      - codigo
+      - desembolso
+      - nombre_cargo_fijo
+    Desembolso:
+      type: object
+      description: Serializer para el modelo Desembolso con cargos fijos incluidos
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        cargos_fijos:
+          type: array
+          items:
+            $ref: '#/components/schemas/CargoFijo'
+          readOnly: true
+        create_at:
+          type: string
+          format: date
+          nullable: true
+        referencia:
+          type: string
+          maxLength: 100
+        obligacion:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_cliente:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        nit_beneficiario:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        aliado:
+          type: string
+          maxLength: 255
+        tipo_cta_destino:
+          type: string
+          maxLength: 50
+        cod_tipo_cuenta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        num_cta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        banco_destino:
+          type: string
+          nullable: true
+          maxLength: 100
+        cod_banco_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        valor_desembolso:
+          type: number
+          format: double
+        numero_tramos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        plazo_tramo_1:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_1:
+          type: string
+          maxLength: 10
+        tasa_tramo_1:
+          type: number
+          format: double
+        amortizacion_tramo_1:
+          type: string
+          maxLength: 10
+        plazo_tramo_2:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_2:
+          type: string
+          maxLength: 10
+        tasa_tramo_2:
+          type: number
+          format: double
+        amortizacion_tramo_2:
+          type: string
+          maxLength: 10
+        dia_pago_cuota:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        estado:
+          type: string
+          nullable: true
+          maxLength: 50
+        observaciones:
+          nullable: true
+        ids_sharepoint:
+          nullable: true
+        etapa_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        intentos_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        update_at:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        tipo_desembolso:
+          type: integer
+          nullable: true
+      required:
+      - aliado
+      - amortizacion_tramo_1
+      - amortizacion_tramo_2
+      - cargos_fijos
+      - cod_tipo_cuenta_destino
+      - id
+      - id_cliente
+      - nit_beneficiario
+      - numero_tramos
+      - obligacion
+      - plazo_tramo_1
+      - plazo_tramo_2
+      - referencia
+      - tasa_tramo_1
+      - tasa_tramo_2
+      - tipo_cta_destino
+      - tipo_tasa_tramo_1
+      - tipo_tasa_tramo_2
+      - update_at
+      - valor_desembolso
+    DesembolsoWrite:
+      type: object
+      description: Serializer para crear/actualizar Desembolso sin cargos fijos anidados
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        create_at:
+          type: string
+          format: date
+          nullable: true
+        referencia:
+          type: string
+          maxLength: 100
+        obligacion:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_cliente:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        nit_beneficiario:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        aliado:
+          type: string
+          maxLength: 255
+        tipo_cta_destino:
+          type: string
+          maxLength: 50
+        cod_tipo_cuenta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        num_cta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        banco_destino:
+          type: string
+          nullable: true
+          maxLength: 100
+        cod_banco_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        valor_desembolso:
+          type: number
+          format: double
+        numero_tramos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        plazo_tramo_1:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_1:
+          type: string
+          maxLength: 10
+        tasa_tramo_1:
+          type: number
+          format: double
+        amortizacion_tramo_1:
+          type: string
+          maxLength: 10
+        plazo_tramo_2:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_2:
+          type: string
+          maxLength: 10
+        tasa_tramo_2:
+          type: number
+          format: double
+        amortizacion_tramo_2:
+          type: string
+          maxLength: 10
+        dia_pago_cuota:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        estado:
+          type: string
+          nullable: true
+          maxLength: 50
+        observaciones:
+          nullable: true
+        ids_sharepoint:
+          nullable: true
+        etapa_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        intentos_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        update_at:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        tipo_desembolso:
+          type: integer
+          nullable: true
+      required:
+      - aliado
+      - amortizacion_tramo_1
+      - amortizacion_tramo_2
+      - cod_tipo_cuenta_destino
+      - id
+      - id_cliente
+      - nit_beneficiario
+      - numero_tramos
+      - obligacion
+      - plazo_tramo_1
+      - plazo_tramo_2
+      - referencia
+      - tasa_tramo_1
+      - tasa_tramo_2
+      - tipo_cta_destino
+      - tipo_tasa_tramo_1
+      - tipo_tasa_tramo_2
+      - update_at
+      - valor_desembolso
+    DesembolsoWriteRequest:
+      type: object
+      description: Serializer para crear/actualizar Desembolso sin cargos fijos anidados
+      properties:
+        create_at:
+          type: string
+          format: date
+          nullable: true
+        referencia:
+          type: string
+          minLength: 1
+          maxLength: 100
+        obligacion:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_cliente:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        nit_beneficiario:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        aliado:
+          type: string
+          minLength: 1
+          maxLength: 255
+        tipo_cta_destino:
+          type: string
+          minLength: 1
+          maxLength: 50
+        cod_tipo_cuenta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        num_cta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        banco_destino:
+          type: string
+          nullable: true
+          maxLength: 100
+        cod_banco_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        valor_desembolso:
+          type: number
+          format: double
+        numero_tramos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        plazo_tramo_1:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_1:
+          type: string
+          minLength: 1
+          maxLength: 10
+        tasa_tramo_1:
+          type: number
+          format: double
+        amortizacion_tramo_1:
+          type: string
+          minLength: 1
+          maxLength: 10
+        plazo_tramo_2:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_2:
+          type: string
+          minLength: 1
+          maxLength: 10
+        tasa_tramo_2:
+          type: number
+          format: double
+        amortizacion_tramo_2:
+          type: string
+          minLength: 1
+          maxLength: 10
+        dia_pago_cuota:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        estado:
+          type: string
+          nullable: true
+          maxLength: 50
+        observaciones:
+          nullable: true
+        ids_sharepoint:
+          nullable: true
+        etapa_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        intentos_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_desembolso:
+          type: integer
+          nullable: true
+      required:
+      - aliado
+      - amortizacion_tramo_1
+      - amortizacion_tramo_2
+      - cod_tipo_cuenta_destino
+      - id_cliente
+      - nit_beneficiario
+      - numero_tramos
+      - obligacion
+      - plazo_tramo_1
+      - plazo_tramo_2
+      - referencia
+      - tasa_tramo_1
+      - tasa_tramo_2
+      - tipo_cta_destino
+      - tipo_tasa_tramo_1
+      - tipo_tasa_tramo_2
+      - valor_desembolso
+    EjecucionETL:
+      type: object
+      description: Serializer para EjecucionETL
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        progreso:
+          type: string
+          readOnly: true
+        tipo_proceso:
+          $ref: '#/components/schemas/TipoProcesoEnum'
+        estado:
+          $ref: '#/components/schemas/EjecucionETLEstadoEnum'
+        fecha_inicio:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_fin:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        total_registros:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_procesados:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_exitosos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_fallidos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        ultima_etapa_ejecutada:
+          type: string
+          nullable: true
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        mensaje_error:
+          type: string
+          nullable: true
+      required:
+      - fecha_fin
+      - fecha_inicio
+      - id
+      - progreso
+      - tipo_proceso
+    EjecucionETLEstadoEnum:
+      enum:
+      - INICIADO
+      - EN_PROGRESO
+      - COMPLETADO
+      - FALLIDO
+      - PAUSADO
+      type: string
+      description: |-
+        * `INICIADO` - Iniciado
+        * `EN_PROGRESO` - En Progreso
+        * `COMPLETADO` - Completado
+        * `FALLIDO` - Fallido
+        * `PAUSADO` - Pausado
+    EjecucionETLRequest:
+      type: object
+      description: Serializer para EjecucionETL
+      properties:
+        tipo_proceso:
+          $ref: '#/components/schemas/TipoProcesoEnum'
+        estado:
+          $ref: '#/components/schemas/EjecucionETLEstadoEnum'
+        total_registros:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_procesados:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_exitosos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_fallidos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        ultima_etapa_ejecutada:
+          type: string
+          nullable: true
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        mensaje_error:
+          type: string
+          nullable: true
+      required:
+      - tipo_proceso
+    Estado7c7Enum:
+      enum:
+      - PENDIENTE
+      - EN_PROGRESO
+      - COMPLETADO
+      - ERROR
+      - OMITIDA
+      type: string
+      description: |-
+        * `PENDIENTE` - Pendiente
+        * `EN_PROGRESO` - En Progreso
+        * `COMPLETADO` - Completado
+        * `ERROR` - Error
+        * `OMITIDA` - Omitida
+    EstadoGeneralEnum:
+      enum:
+      - PENDIENTE
+      - EN_PROGRESO
+      - COMPLETADO
+      - ERROR
+      - PAUSADO
+      type: string
+      description: |-
+        * `PENDIENTE` - Pendiente
+        * `EN_PROGRESO` - En Progreso
+        * `COMPLETADO` - Completado
+        * `ERROR` - Error
+        * `PAUSADO` - Pausado
+    EtapaProcesoDesembolso:
+      type: object
+      description: Serializer para EtapaProcesoDesembolso
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        etapa_nombre:
+          type: string
+          readOnly: true
+        etapa_descripcion:
+          type: string
+          readOnly: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Orden de ejecución de la etapa
+        estado:
+          $ref: '#/components/schemas/Estado7c7Enum'
+        fecha_inicio:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        fecha_completado:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        intentos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        mensaje_error:
+          type: string
+          nullable: true
+        datos_etapa:
+          nullable: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+        proceso:
+          type: integer
+        etapa:
+          type: integer
+      required:
+      - etapa
+      - etapa_descripcion
+      - etapa_nombre
+      - fecha_actualizacion
+      - fecha_completado
+      - fecha_creacion
+      - fecha_inicio
+      - id
+      - orden
+      - proceso
+    EtapaProcesoDesembolsoRequest:
+      type: object
+      description: Serializer para EtapaProcesoDesembolso
+      properties:
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Orden de ejecución de la etapa
+        estado:
+          $ref: '#/components/schemas/Estado7c7Enum'
+        intentos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        mensaje_error:
+          type: string
+          nullable: true
+        datos_etapa:
+          nullable: true
+        proceso:
+          type: integer
+        etapa:
+          type: integer
+      required:
+      - etapa
+      - orden
+      - proceso
+    EtapaProcesoGarantia:
+      type: object
+      description: Serializer para EtapaProcesoGarantia
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        etapa_nombre:
+          type: string
+          readOnly: true
+        etapa_descripcion:
+          type: string
+          readOnly: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Orden de ejecución de la etapa
+        estado:
+          $ref: '#/components/schemas/Estado7c7Enum'
+        fecha_inicio:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        fecha_completado:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        intentos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        mensaje_error:
+          type: string
+          nullable: true
+        datos_etapa:
+          nullable: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+        proceso:
+          type: integer
+        etapa:
+          type: integer
+      required:
+      - etapa
+      - etapa_descripcion
+      - etapa_nombre
+      - fecha_actualizacion
+      - fecha_completado
+      - fecha_creacion
+      - fecha_inicio
+      - id
+      - orden
+      - proceso
+    EtapaProcesoGarantiaRequest:
+      type: object
+      description: Serializer para EtapaProcesoGarantia
+      properties:
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Orden de ejecución de la etapa
+        estado:
+          $ref: '#/components/schemas/Estado7c7Enum'
+        intentos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        mensaje_error:
+          type: string
+          nullable: true
+        datos_etapa:
+          nullable: true
+        proceso:
+          type: integer
+        etapa:
+          type: integer
+      required:
+      - etapa
+      - orden
+      - proceso
+    EtapaTipoDesembolso:
+      type: object
+      description: Serializer para EtapaTipoDesembolso
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        tipo_desembolso:
+          type: integer
+      required:
+      - created_at
+      - id
+      - nombre
+      - orden
+      - tipo_desembolso
+      - updated_at
+    EtapaTipoDesembolsoRequest:
+      type: object
+      description: Serializer para EtapaTipoDesembolso
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_desembolso:
+          type: integer
+      required:
+      - nombre
+      - orden
+      - tipo_desembolso
+    EtapaTipoGarantia:
+      type: object
+      description: Serializer para EtapaTipoGarantia
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        tipo_garantia:
+          type: integer
+      required:
+      - created_at
+      - id
+      - nombre
+      - orden
+      - tipo_garantia
+      - updated_at
+    EtapaTipoGarantiaRequest:
+      type: object
+      description: Serializer para EtapaTipoGarantia
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_garantia:
+          type: integer
+      required:
+      - nombre
+      - orden
+      - tipo_garantia
+    Garantia:
+      type: object
+      description: Serializer para el modelo Garantia
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        fecha_desembolso:
+          type: integer
+          nullable: true
+        fecha_prenda:
+          type: integer
+          nullable: true
+        fecha_vencimiento_seguro:
+          type: integer
+          nullable: true
+        referencia:
+          type: string
+          maxLength: 100
+        obligacion:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_cliente:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_garante:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cod_fasecolda:
+          type: string
+          maxLength: 50
+        codigo_fasecolda:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          nullable: true
+          maxLength: 100
+        placa:
+          type: string
+          maxLength: 20
+        poliza_vehiculo:
+          type: string
+          nullable: true
+          maxLength: 50
+        cod_aseguradora:
+          type: string
+          nullable: true
+          maxLength: 20
+        nro_poliza:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_asegurado:
+          type: number
+          format: double
+          nullable: true
+        tipo_prima:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_prima:
+          type: number
+          format: double
+          nullable: true
+        folio_electronico:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_vehiculo:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        modelo:
+          type: string
+          nullable: true
+          maxLength: 10
+        chasis:
+          type: string
+          nullable: true
+          maxLength: 50
+        motor:
+          type: string
+          nullable: true
+          maxLength: 50
+        serie:
+          type: string
+          nullable: true
+          maxLength: 50
+        servicio:
+          type: string
+          nullable: true
+          maxLength: 50
+        estado:
+          type: string
+          nullable: true
+          maxLength: 50
+      required:
+      - cod_fasecolda
+      - codigo_fasecolda
+      - id
+      - id_cliente
+      - id_garante
+      - obligacion
+      - placa
+      - referencia
+    GarantiaRequest:
+      type: object
+      description: Serializer para el modelo Garantia
+      properties:
+        fecha_desembolso:
+          type: integer
+          nullable: true
+        fecha_prenda:
+          type: integer
+          nullable: true
+        fecha_vencimiento_seguro:
+          type: integer
+          nullable: true
+        referencia:
+          type: string
+          minLength: 1
+          maxLength: 100
+        obligacion:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_cliente:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_garante:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cod_fasecolda:
+          type: string
+          minLength: 1
+          maxLength: 50
+        codigo_fasecolda:
+          type: string
+          minLength: 1
+          maxLength: 50
+        color:
+          type: string
+          nullable: true
+          maxLength: 100
+        placa:
+          type: string
+          minLength: 1
+          maxLength: 20
+        poliza_vehiculo:
+          type: string
+          nullable: true
+          maxLength: 50
+        cod_aseguradora:
+          type: string
+          nullable: true
+          maxLength: 20
+        nro_poliza:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_asegurado:
+          type: number
+          format: double
+          nullable: true
+        tipo_prima:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_prima:
+          type: number
+          format: double
+          nullable: true
+        folio_electronico:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_vehiculo:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        modelo:
+          type: string
+          nullable: true
+          maxLength: 10
+        chasis:
+          type: string
+          nullable: true
+          maxLength: 50
+        motor:
+          type: string
+          nullable: true
+          maxLength: 50
+        serie:
+          type: string
+          nullable: true
+          maxLength: 50
+        servicio:
+          type: string
+          nullable: true
+          maxLength: 50
+        estado:
+          type: string
+          nullable: true
+          maxLength: 50
+      required:
+      - cod_fasecolda
+      - codigo_fasecolda
+      - id_cliente
+      - id_garante
+      - obligacion
+      - placa
+      - referencia
+    PaginatedCargoFijoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CargoFijo'
+    PaginatedDesembolsoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Desembolso'
+    PaginatedEjecucionETLList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EjecucionETL'
+    PaginatedEtapaProcesoDesembolsoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaProcesoDesembolso'
+    PaginatedEtapaProcesoGarantiaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaProcesoGarantia'
+    PaginatedEtapaTipoDesembolsoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaTipoDesembolso'
+    PaginatedEtapaTipoGarantiaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaTipoGarantia'
+    PaginatedGarantiaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Garantia'
+    PaginatedProcesoDesembolsoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcesoDesembolso'
+    PaginatedProcesoGarantiaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcesoGarantia'
+    PaginatedTipoDesembolsoList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TipoDesembolso'
+    PaginatedTipoGarantiaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TipoGarantia'
+    PatchedCargoFijoRequest:
+      type: object
+      description: Serializer para el modelo CargoFijo
+      properties:
+        fecha_efectiva:
+          type: integer
+          nullable: true
+        fecha_revision:
+          type: integer
+          nullable: true
+        codigo:
+          type: string
+          minLength: 1
+          maxLength: 10
+        nombre_cargo_fijo:
+          type: string
+          minLength: 1
+          maxLength: 255
+        periodicidad:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor:
+          type: number
+          format: double
+          nullable: true
+        desembolso:
+          type: integer
+    PatchedDesembolsoWriteRequest:
+      type: object
+      description: Serializer para crear/actualizar Desembolso sin cargos fijos anidados
+      properties:
+        create_at:
+          type: string
+          format: date
+          nullable: true
+        referencia:
+          type: string
+          minLength: 1
+          maxLength: 100
+        obligacion:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_cliente:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        nit_beneficiario:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        aliado:
+          type: string
+          minLength: 1
+          maxLength: 255
+        tipo_cta_destino:
+          type: string
+          minLength: 1
+          maxLength: 50
+        cod_tipo_cuenta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        num_cta_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        banco_destino:
+          type: string
+          nullable: true
+          maxLength: 100
+        cod_banco_destino:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        valor_desembolso:
+          type: number
+          format: double
+        numero_tramos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        plazo_tramo_1:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_1:
+          type: string
+          minLength: 1
+          maxLength: 10
+        tasa_tramo_1:
+          type: number
+          format: double
+        amortizacion_tramo_1:
+          type: string
+          minLength: 1
+          maxLength: 10
+        plazo_tramo_2:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_tasa_tramo_2:
+          type: string
+          minLength: 1
+          maxLength: 10
+        tasa_tramo_2:
+          type: number
+          format: double
+        amortizacion_tramo_2:
+          type: string
+          minLength: 1
+          maxLength: 10
+        dia_pago_cuota:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        estado:
+          type: string
+          nullable: true
+          maxLength: 50
+        observaciones:
+          nullable: true
+        ids_sharepoint:
+          nullable: true
+        etapa_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        intentos_desembolso:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_desembolso:
+          type: integer
+          nullable: true
+    PatchedEjecucionETLRequest:
+      type: object
+      description: Serializer para EjecucionETL
+      properties:
+        tipo_proceso:
+          $ref: '#/components/schemas/TipoProcesoEnum'
+        estado:
+          $ref: '#/components/schemas/EjecucionETLEstadoEnum'
+        total_registros:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_procesados:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_exitosos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        registros_fallidos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        ultima_etapa_ejecutada:
+          type: string
+          nullable: true
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        mensaje_error:
+          type: string
+          nullable: true
+    PatchedEtapaProcesoDesembolsoRequest:
+      type: object
+      description: Serializer para EtapaProcesoDesembolso
+      properties:
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Orden de ejecución de la etapa
+        estado:
+          $ref: '#/components/schemas/Estado7c7Enum'
+        intentos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        mensaje_error:
+          type: string
+          nullable: true
+        datos_etapa:
+          nullable: true
+        proceso:
+          type: integer
+        etapa:
+          type: integer
+    PatchedEtapaProcesoGarantiaRequest:
+      type: object
+      description: Serializer para EtapaProcesoGarantia
+      properties:
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          description: Orden de ejecución de la etapa
+        estado:
+          $ref: '#/components/schemas/Estado7c7Enum'
+        intentos:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        mensaje_error:
+          type: string
+          nullable: true
+        datos_etapa:
+          nullable: true
+        proceso:
+          type: integer
+        etapa:
+          type: integer
+    PatchedEtapaTipoDesembolsoRequest:
+      type: object
+      description: Serializer para EtapaTipoDesembolso
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_desembolso:
+          type: integer
+    PatchedEtapaTipoGarantiaRequest:
+      type: object
+      description: Serializer para EtapaTipoGarantia
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        orden:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tipo_garantia:
+          type: integer
+    PatchedGarantiaRequest:
+      type: object
+      description: Serializer para el modelo Garantia
+      properties:
+        fecha_desembolso:
+          type: integer
+          nullable: true
+        fecha_prenda:
+          type: integer
+          nullable: true
+        fecha_vencimiento_seguro:
+          type: integer
+          nullable: true
+        referencia:
+          type: string
+          minLength: 1
+          maxLength: 100
+        obligacion:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_cliente:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        id_garante:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cod_fasecolda:
+          type: string
+          minLength: 1
+          maxLength: 50
+        codigo_fasecolda:
+          type: string
+          minLength: 1
+          maxLength: 50
+        color:
+          type: string
+          nullable: true
+          maxLength: 100
+        placa:
+          type: string
+          minLength: 1
+          maxLength: 20
+        poliza_vehiculo:
+          type: string
+          nullable: true
+          maxLength: 50
+        cod_aseguradora:
+          type: string
+          nullable: true
+          maxLength: 20
+        nro_poliza:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_asegurado:
+          type: number
+          format: double
+          nullable: true
+        tipo_prima:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_prima:
+          type: number
+          format: double
+          nullable: true
+        folio_electronico:
+          type: string
+          nullable: true
+          maxLength: 50
+        valor_vehiculo:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        modelo:
+          type: string
+          nullable: true
+          maxLength: 10
+        chasis:
+          type: string
+          nullable: true
+          maxLength: 50
+        motor:
+          type: string
+          nullable: true
+          maxLength: 50
+        serie:
+          type: string
+          nullable: true
+          maxLength: 50
+        servicio:
+          type: string
+          nullable: true
+          maxLength: 50
+        estado:
+          type: string
+          nullable: true
+          maxLength: 50
+    PatchedProcesoDesembolsoRequest:
+      type: object
+      description: Serializer para ProcesoDesembolso
+      properties:
+        estado_general:
+          $ref: '#/components/schemas/EstadoGeneralEnum'
+        ejecucion:
+          type: integer
+        desembolso:
+          type: integer
+    PatchedProcesoGarantiaRequest:
+      type: object
+      description: Serializer para ProcesoGarantia
+      properties:
+        estado_general:
+          $ref: '#/components/schemas/EstadoGeneralEnum'
+        ejecucion:
+          type: integer
+        garantia:
+          type: integer
+    PatchedTipoDesembolsoRequest:
+      type: object
+      description: Serializer para TipoDesembolso
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+    PatchedTipoGarantiaRequest:
+      type: object
+      description: Serializer para TipoGarantia
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+    ProcesoDesembolso:
+      type: object
+      description: Serializer para ProcesoDesembolso
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        desembolso_referencia:
+          type: string
+          readOnly: true
+        etapas:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaProcesoDesembolso'
+          readOnly: true
+        etapa_actual_info:
+          type: string
+          readOnly: true
+        siguiente_etapa_info:
+          type: string
+          readOnly: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_completado:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        estado_general:
+          $ref: '#/components/schemas/EstadoGeneralEnum'
+        ejecucion:
+          type: integer
+        desembolso:
+          type: integer
+      required:
+      - desembolso
+      - desembolso_referencia
+      - ejecucion
+      - etapa_actual_info
+      - etapas
+      - fecha_actualizacion
+      - fecha_completado
+      - fecha_creacion
+      - id
+      - siguiente_etapa_info
+    ProcesoDesembolsoRequest:
+      type: object
+      description: Serializer para ProcesoDesembolso
+      properties:
+        estado_general:
+          $ref: '#/components/schemas/EstadoGeneralEnum'
+        ejecucion:
+          type: integer
+        desembolso:
+          type: integer
+      required:
+      - desembolso
+      - ejecucion
+    ProcesoGarantia:
+      type: object
+      description: Serializer para ProcesoGarantia
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        garantia_placa:
+          type: string
+          readOnly: true
+        etapas:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaProcesoGarantia'
+          readOnly: true
+        etapa_actual_info:
+          type: string
+          readOnly: true
+        siguiente_etapa_info:
+          type: string
+          readOnly: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_actualizacion:
+          type: string
+          format: date-time
+          readOnly: true
+        fecha_completado:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        estado_general:
+          $ref: '#/components/schemas/EstadoGeneralEnum'
+        ejecucion:
+          type: integer
+        garantia:
+          type: integer
+      required:
+      - ejecucion
+      - etapa_actual_info
+      - etapas
+      - fecha_actualizacion
+      - fecha_completado
+      - fecha_creacion
+      - garantia
+      - garantia_placa
+      - id
+      - siguiente_etapa_info
+    ProcesoGarantiaRequest:
+      type: object
+      description: Serializer para ProcesoGarantia
+      properties:
+        estado_general:
+          $ref: '#/components/schemas/EstadoGeneralEnum'
+        ejecucion:
+          type: integer
+        garantia:
+          type: integer
+      required:
+      - ejecucion
+      - garantia
+    TipoDesembolso:
+      type: object
+      description: Serializer para TipoDesembolso
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        etapas:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaTipoDesembolso'
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - etapas
+      - id
+      - nombre
+      - updated_at
+    TipoDesembolsoRequest:
+      type: object
+      description: Serializer para TipoDesembolso
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+      required:
+      - nombre
+    TipoGarantia:
+      type: object
+      description: Serializer para TipoGarantia
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - nombre
+      - updated_at
+    TipoGarantiaRequest:
+      type: object
+      description: Serializer para TipoGarantia
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          nullable: true
+      required:
+      - nombre
+    TipoProcesoEnum:
+      enum:
+      - DESEMBOLSO
+      - GARANTIA
+      type: string
+      description: |-
+        * `DESEMBOLSO` - Proceso de Desembolso
+        * `GARANTIA` - Proceso de Garantía
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

@@ -347,6 +347,48 @@ curl -X PATCH "http://localhost:8000/adagio/api/casos/1/" \
 }
 ```
 
+## 📊 Diccionario de Datos de Integración
+
+Cuando otros equipos preguntan **qué información se requiere** para registrar
+Desembolsos, Cargos Fijos, Garantías (app `dexter`) o Casos de Débito (app
+`adagio`), el proyecto incluye un generador que produce un diccionario de datos
+en Excel listo para compartir.
+
+### Generar / actualizar el archivo
+
+```bash
+# Desde la raíz del proyecto, con el entorno virtual activado
+python docs/generar_diccionario_datos.py
+```
+
+El script crea (o sobrescribe) `docs/Diccionario_Datos_Integracion.xlsx`. El
+`.xlsx` siempre se genera dentro de `docs/`, sin importar desde qué carpeta se
+ejecute el script.
+
+> Requiere la dependencia `openpyxl` (incluida en `requirements.txt`).
+
+### Contenido del archivo generado
+
+El libro de Excel contiene:
+
+- Una hoja **Instrucciones** de portada.
+- Una hoja **`Dicc - <Entidad>`** por entidad: diccionario de campos con
+  descripción, tipo de dato, si es obligatorio, formato/regla, valores
+  permitidos y un ejemplo.
+- Una hoja **`Plantilla - <Entidad>`** por entidad: formato en blanco para que
+  los equipos diligencien los datos (con listas desplegables donde aplica).
+
+### ¿Cuándo regenerarlo?
+
+Ejecute el script **cada vez que cambien los modelos o serializers** de `dexter`
+o `adagio`, para mantener el diccionario sincronizado con la API. Los campos
+documentados se definen dentro del propio script, en los diccionarios
+`DESEMBOLSO`, `CARGO_FIJO`, `GARANTIA` y `CASO_DEBITO`: edítelos ahí si agrega o
+modifica campos.
+
+> Documentación técnica complementaria de la API en `dexter/API_DOCUMENTATION.md`
+> y en el esquema OpenAPI servido en `/api/schema/` (UI en `/api/docs/`).
+
 ## 🔐 Panel de Administración
 
 **Acceso**: `http://localhost:8000/admin/`
@@ -504,6 +546,16 @@ kcique_project/
 │   ├── models.py
 │   ├── views.py
 │   └── forms.py
+├── dexter/                  # App de ETL y tracking (desembolsos/garantías)
+│   ├── models.py
+│   ├── viewsets.py
+│   ├── serializers.py
+│   ├── API_DOCUMENTATION.md # Documentación de la API
+│   └── schema.yaml          # Esquema OpenAPI 3
+├── docs/                    # Documentación y entregables
+│   ├── generar_diccionario_datos.py
+│   └── Diccionario_Datos_Integracion.xlsx
+├── ejemplos/                # Scripts de ejemplo y prueba
 ├── templates/               # Templates HTML
 ├── static/                  # Archivos estáticos
 └── scripts/                 # Scripts utilitarios

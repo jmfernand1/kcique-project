@@ -18,6 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 # from django.views.generic import RedirectView # Ya no es necesario para la raíz
 from automations import views as automations_views # Importar vistas de automations
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +30,13 @@ urlpatterns = [
     path('', automations_views.home_view, name='home'),
     path('adagio/', include('adagio.urls')),
     path('dexter/', include('dexter.urls')),
+
+    # Documentación de la API (OpenAPI 3 / drf-spectacular)
+    # Esquema descargable en .yaml: /api/schema/
+    # Esquema en .json:            /api/schema/?format=json
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # UI interactiva Swagger:      /api/docs/
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # UI alternativa ReDoc:        /api/redoc/
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

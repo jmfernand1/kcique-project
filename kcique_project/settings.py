@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'django_filters',
     'automations',
     'adagio',
@@ -141,7 +142,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25
+    'PAGE_SIZE': 25,
+    # Generación automática del esquema OpenAPI 3 (drf-spectacular)
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# Configuración del esquema OpenAPI / documentación (drf-spectacular)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Dexter - KCIQUE',
+    'DESCRIPTION': (
+        'API REST de la app Dexter: ETL de Desembolsos y Garantías, '
+        'y tracking de procesos/etapas. Permite a un desarrollador externo '
+        'consumir o entregar información a la integración.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': r'/dexter/api',
+    'COMPONENT_SPLIT_REQUEST': True,
+    # Deja en el esquema únicamente los endpoints de la API de Dexter
+    'PREPROCESSING_HOOKS': ['dexter.schema_hooks.filtrar_endpoints_dexter'],
 }
 
 # Configuración para django-q
